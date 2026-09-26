@@ -3,7 +3,7 @@ import { test, before, after, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { playwright, chromiumOptions } from './helpers.mjs';
+import { playwright, chromiumOptions, KEYS } from './helpers.mjs';
 import { startServer } from './server.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -24,7 +24,7 @@ beforeEach(async () => {
   await page.evaluate(() => { document.querySelector('textarea[name=text]').value = ''; });
   await page.evaluate(() => DiversiaEditor.get(document.querySelector('textarea[name=text]')).setMarkup('Start'));
   await page.locator('.dvw-area').click();
-  await page.keyboard.press('Control+End');
+  await page.keyboard.press(KEYS.toEnd);
 });
 
 const value = () => page.locator('textarea[name=text]').inputValue();

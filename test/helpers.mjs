@@ -19,6 +19,15 @@ export function chromiumOptions(extra = {}) {
   return opts;
 }
 
+// Chromium follows the host platform's editing conventions, so the tests have
+// to as well: on macOS it is Cmd+I for italic and Cmd+Down to reach the end of
+// a contenteditable, not Ctrl+I and Ctrl+End.
+const mac = process.platform === 'darwin';
+export const KEYS = {
+  toEnd: mac ? 'Meta+ArrowDown' : 'Control+End',
+  italic: mac ? 'Meta+i' : 'Control+i',
+};
+
 export function launchBrowser() {
   return playwright.chromium.launch(chromiumOptions());
 }

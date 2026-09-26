@@ -7,7 +7,7 @@ import { readFile, mkdtemp } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import os from 'node:os';
 import path from 'node:path';
-import { playwright, chromiumOptions } from './helpers.mjs';
+import { playwright, chromiumOptions, KEYS } from './helpers.mjs';
 import { build } from '../scripts/build.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -59,7 +59,7 @@ test('demo page: toolbar formatting ends up as Diversia markup in the textarea',
 
   // type at the end, select it, make it bold and red
   await area.click();
-  await page.keyboard.press('Control+End');
+  await page.keyboard.press(KEYS.toEnd);
   await page.keyboard.press('Enter');
   await page.keyboard.type('Ny rad');
   await page.keyboard.down('Shift');
@@ -82,7 +82,7 @@ test('demo page: toolbar formatting ends up as Diversia markup in the textarea',
 
   // pasting rich HTML is cleaned to the whitelist
   await area.click();
-  await page.keyboard.press('Control+End');
+  await page.keyboard.press(KEYS.toEnd);
   await page.evaluate(() => {
     const dt = new DataTransfer();
     dt.setData('text/html', '<h2>Rubrik</h2><p style="color:#1565c0">blå <script>x</script>text</p>');
@@ -125,9 +125,9 @@ test('extension: switch appears on Diversia pages and the form posts markup', as
     await area.waitFor();
     assert.equal(await area.locator('b', { hasText: 'fet' }).count(), 1);
     await area.click();
-    await page.keyboard.press('Control+End');
+    await page.keyboard.press(KEYS.toEnd);
     await page.keyboard.type(' och ');
-    await page.keyboard.press('Control+i');
+    await page.keyboard.press(KEYS.italic);
     await page.keyboard.type('kursiv');
     if (SHOTS) await page.screenshot({ path: path.join(SHOTS, 'extension.png') });
     await Promise.all([page.waitForNavigation(), page.click('#save')]);
