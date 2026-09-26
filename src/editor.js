@@ -67,6 +67,36 @@
       textarea.dispatchEvent(new Event('change', { bubbles: true }));
       if (opts.onChange) opts.onChange(markup);
     }
+    /*
+     * The page's own controls still write to the textarea while it is hidden.
+     * Diversia's emoji picker does exactly that: insertAtCursor() puts the
+     * character straight into the box, so nothing appears in the editor, and
+     * the next keystroke serialises the editor over it and the emoji is gone.
+     * Anything written from outside is adopted into the editor instead.
+     */
+    function adoptOutsideEdit() {
+      if (sourceMode || !ATTACHED.has(textarea)) return;
+      const outside = textarea.value;
+      if (outside === lastMarkup) return;
+      const focused = area.contains(document.activeElement) || document.activeElement === area;
+      load(outside);
+      // keep the box and the editor agreed, so this doesn't fire again
+      lastMarkup = M.serialize(area);
+      textarea.value = lastMarkup;
+      if (focused) {
+        const r = document.createRange();
+        r.selectNodeContents(area);
+        r.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+      }
+      if (opts.onChange) opts.onChange(lastMarkup);
+    }
+    // Capture runs before the page's own click handler, so look afterwards.
+    const onDocClick = () => setTimeout(adoptOutsideEdit, 0);
+    document.addEventListener('click', onDocClick, true);
+
     const observer = new MutationObserver(sync);
     observer.observe(area, { childList: true, subtree: true, characterData: true, attributes: true });
 
@@ -337,6 +367,7 @@
       detach() {
         sync();
         observer.disconnect();
+        document.removeEventListener('click', onDocClick, true);
         document.removeEventListener('selectionchange', onSelChange);
         textarea.style.display = prevDisplay;
         wrapper.parentNode.insertBefore(textarea, wrapper);

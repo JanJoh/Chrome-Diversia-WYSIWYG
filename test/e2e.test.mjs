@@ -189,3 +189,35 @@ test('extension: a newer release is announced next to the switch, and can be swi
     await ctx.close();
   }
 });
+
+// Diversia's own emoji picker calls insertAtCursor() straight into the
+// textarea, which the editor hides. Before this was handled the character
+// never appeared in the editor and the next keystroke serialised over it.
+test('demo page: text put into the hidden textarea by the page is adopted', async () => {
+  const b = await playwright.chromium.launch(chromiumOptions());
+  try {
+    const page = await b.newPage({ viewport: { width: 1000, height: 900 } });
+    await page.goto(`http://127.0.0.1:${port}/demo/index.html`);
+    await page.locator('.dvw-area').waitFor();
+    await page.evaluate(() => DiversiaEditor.get(document.querySelector('textarea[name=text]')).setMarkup('Hej'));
+
+    // what the site's picker does: write to the box, then a click elsewhere
+    await page.evaluate(() => {
+      const ta = document.querySelector('textarea[name=text]');
+      ta.value = ta.value + ' \u{1F60D}';
+      document.body.click();
+    });
+    await page.waitForFunction(() => /\u{1F60D}/u.test(document.querySelector('.dvw-area').innerText), null, { timeout: 5000 });
+    assert.match(await page.locator('.dvw-area').innerText(), /Hej \u{1F60D}/u, 'shown in the editor');
+
+    // and it must survive the editor writing back over the textarea
+    await page.locator('.dvw-area').click();
+    await page.keyboard.press(KEYS.toEnd);
+    await page.keyboard.type('!');
+    const markup = await page.locator('textarea[name=text]').inputValue();
+    assert.ok(markup.includes('\u{1F60D}'), `emoji still in the markup: ${markup}`);
+    assert.match(markup, /!$/, 'and the typing landed too');
+  } finally {
+    await b.close();
+  }
+});
