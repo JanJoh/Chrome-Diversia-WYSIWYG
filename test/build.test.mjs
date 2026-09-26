@@ -62,6 +62,10 @@ test('Chrome and Safari use a service worker, Firefox an event page with a gecko
   assert.deepEqual(ff.background, { scripts: ['src/version.js', 'src/background.js'] });
   assert.equal(ff.browser_specific_settings.gecko.id, GECKO_ID);
   assert.deepEqual(ff.browser_specific_settings.gecko.data_collection_permissions, { required: ['none'] });
+  // that key only exists from Firefox 140 (142 on Android); stating an older
+  // minimum makes web-ext lint warn
+  assert.ok(parseInt(ff.browser_specific_settings.gecko.strict_min_version, 10) >= 140);
+  assert.ok(parseInt(ff.browser_specific_settings.gecko_android.strict_min_version, 10) >= 142);
 });
 
 test('source uses the browser/chrome shim, never chrome.* directly', () => {

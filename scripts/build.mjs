@@ -21,11 +21,14 @@ export function manifestFor(target) {
     m.browser_specific_settings = {
       gecko: {
         id: GECKO_ID,
-        strict_min_version: '128.0',
+        // data_collection_permissions below only exists from 140, and
+        // web-ext lint rejects declaring it with a lower minimum.
+        strict_min_version: '140.0',
         // the extension collects and sends nothing
         data_collection_permissions: { required: ['none'] },
       },
-      gecko_android: { strict_min_version: '128.0' },
+      // Firefox for Android got the same key two releases later.
+      gecko_android: { strict_min_version: '142.0' },
     };
   }
   if (target === 'safari') {
