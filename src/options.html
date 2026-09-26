@@ -8,6 +8,9 @@
     h1 { font-size: 15px; margin: 0 0 12px; }
     .row { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; }
     .hint { color: #666; font-size: 12px; margin: 4px 0 0; }
+    button { font: inherit; padding: 4px 10px; border-radius: 4px; border: 1px solid #999; background: #f6f6f6; cursor: pointer; }
+    button[disabled] { opacity: .6; cursor: default; }
+    @media (prefers-color-scheme: dark) { button { background: #303134; color: #e8eaed; border-color: #5f6368; } }
     .note { background: #f3f6fb; border-left: 3px solid #3b6ea5; padding: 8px 10px; }
     @media (prefers-color-scheme: dark) {
       body { background: #202124; color: #e8eaed; }
@@ -28,6 +31,11 @@
     <label for="updateCheck" id="updateCheckLabel"></label>
   </div>
   <p class="hint" id="updateCheckHint"></p>
+
+  <div class="row">
+    <button type="button" id="checkNow"></button>
+    <span class="hint" id="checkStatus"></span>
+  </div>
 
   <p class="hint" id="installed"></p>
 

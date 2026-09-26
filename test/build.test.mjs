@@ -40,6 +40,10 @@ test('the version check reaches GitHub only, and can be switched off', () => {
   const v = readFileSync('src/version.js', 'utf8');
   assert.match(v, /api\.github\.com/);
   assert.match(v, /SETTING_KEY/);
+  assert.match(v, /RETRY_AFTER_MS/);
+  // the options page can force a check past the waiting period
+  assert.match(readFileSync('src/background.js', 'utf8'), /latestTag\(msg\.force\)/);
+  assert.match(readFileSync('src/options.js', 'utf8'), /refresh\(true\)/);
   // Chrome and Safari load version.js through importScripts; Firefox lists it
   // in the manifest, so the service-worker-only path must not be the only one.
   assert.deepEqual(manifest('firefox').background.scripts, ['src/version.js', 'src/background.js']);

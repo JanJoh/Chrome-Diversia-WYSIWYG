@@ -180,7 +180,9 @@ Tag attributes you didn't touch are kept exactly as written, including their ord
 
 The extension asks GitHub once a day what the latest release is. If a newer version exists, a link appears next to the **Visuell redigering** switch: *Version 0.4.0 is available*. Clicking the icon adds the editor, so there is no panel to put the notice in — it goes where you are already looking.
 
-It can be switched off: right-click the icon and choose **Options** (or go via `chrome://extensions`), and clear **Look for new versions**.
+It can be switched off: right-click the icon and choose **Options** (or go via `chrome://extensions`), and clear **Look for new versions**. That panel also has **Check now**, which asks straight away instead of waiting for the next time.
+
+If a check fails the previous answer is kept, but another attempt is made within the hour rather than the next day. Otherwise a check made before the project's first release even existed would silence the notice for a whole day afterwards.
 
 This is the extension's only request to anything other than the page you are on. No cookies are sent (`credentials: "omit"`), no headers of our own are set, and nothing about you or your text goes with it. The answer is cached locally for a day, so twenty open Diversia tabs still cost at most one request. No new permission is asked for, since GitHub allows cross-origin reads.
 

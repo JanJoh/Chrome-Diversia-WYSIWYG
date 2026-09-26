@@ -47,35 +47,42 @@ async function cached() {
   }
 }
 
-// Resolves to the newest release tag we know of, or null. Never throws: a
-// version check is not worth interrupting anything for.
-async function latestTag() {
+// Resolves to { ok, latest }. Never throws: a version check is not worth
+// interrupting anything for. `force` skips the waiting period, for the button
+// in the options page.
+async function latestTag(force) {
   const { cache, enabled } = await cached();
-  if (!enabled) return null;
-  if (Date.now() - (cache.t || 0) < V.CHECK_AFTER_MS) return cache.latest || null;
+  if (!enabled) return { ok: true, latest: null };
+  // A check that failed is retried in an hour; one that succeeded, tomorrow.
+  const waitFor = cache.failed ? V.RETRY_AFTER_MS : V.CHECK_AFTER_MS;
+  if (!force && Date.now() - (cache.t || 0) < waitFor) return { ok: !cache.failed, latest: cache.latest || null };
   try {
     const res = await fetch(V.RELEASE_API, { credentials: 'omit', cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const tag = (await res.json()).tag_name;
     if (!tag) throw new Error('no tag_name in response');
     await ext.storage.local.set({ [V.CACHE_KEY]: { t: Date.now(), latest: tag } });
-    return tag;
+    return { ok: true, latest: tag };
   } catch (e) {
-    // A failed check isn't worth telling the user about, and isn't worth
-    // retrying before tomorrow either: stamp the time, keep the old answer.
+    // Keep the old answer, but mark the attempt as failed so it is tried again
+    // within the hour rather than tomorrow.
     console.warn('Diversia WYSIWYG: version check failed', e);
-    try { await ext.storage.local.set({ [V.CACHE_KEY]: { ...cache, t: Date.now() } }); } catch (e2) { /* ignore */ }
-    return cache.latest || null;
+    try { await ext.storage.local.set({ [V.CACHE_KEY]: { ...cache, t: Date.now(), failed: true } }); } catch (e2) { /* ignore */ }
+    return { ok: false, latest: cache.latest || null };
   }
 }
 
 ext.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (!msg || msg.type !== V.MESSAGE) return false;
-  latestTag().then((latest) => {
+  latestTag(msg.force).then(({ ok, latest }) => {
     const current = ext.runtime.getManifest().version;
-    sendResponse(latest && V.isNewer(latest, current)
-      ? { latest: String(latest).replace(/^v/i, ''), url: V.RELEASES_URL }
-      : null);
+    sendResponse({
+      ok,
+      current,
+      latest: latest ? String(latest).replace(/^v/i, '') : null,
+      newer: !!latest && V.isNewer(latest, current),
+      url: V.RELEASES_URL,
+    });
   });
   return true;  // answering asynchronously
 });

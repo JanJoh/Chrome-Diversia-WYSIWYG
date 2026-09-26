@@ -35,6 +35,10 @@
     RELEASE_API: `https://api.github.com/repos/${REPO}/releases/latest`,
     RELEASES_URL: `https://github.com/${REPO}/releases`,
     CHECK_AFTER_MS: 24 * 60 * 60 * 1000,
+    // A failed check comes back sooner than a successful one. A check made
+    // before the project's first release ever existed must not suppress the
+    // notice for a whole day afterwards.
+    RETRY_AFTER_MS: 60 * 60 * 1000,
     CACHE_KEY: 'dvw-versioncheck',   // { t, latest } in storage.local
     SETTING_KEY: 'dvw-updatecheck',  // boolean in storage.local, default on
     MESSAGE: 'dvw-update',

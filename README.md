@@ -178,7 +178,9 @@ Taggattribut som du inte rört behålls exakt som de skrevs, inklusive ordningen
 
 Tillägget frågar GitHub en gång per dygn vilken den senaste utgåvan är. Finns det en nyare version dyker en länk upp bredvid **Visuell redigering**-knappen: *Version 0.4.0 finns att hämta*. Eftersom ett klick på ikonen lägger till redigeraren finns ingen panel att visa notisen i, så den hamnar där du ändå tittar.
 
-Kontrollen går att stänga av: högerklicka på ikonen och välj **Alternativ** (eller gå via `chrome://extensions`), och avmarkera **Sök efter nya versioner**.
+Kontrollen går att stänga av: högerklicka på ikonen och välj **Alternativ** (eller gå via `chrome://extensions`), och avmarkera **Sök efter nya versioner**. Där finns också **Sök nu**, som frågar direkt i stället för att vänta på nästa gång.
+
+Misslyckas en kontroll behålls det tidigare svaret, men ett nytt försök görs inom en timme i stället för först nästa dygn. Annars hade en kontroll gjord innan projektets första utgåva ens fanns tystat notisen ett helt dygn efteråt.
 
 Det är tilläggets enda anrop till något annat än sidan du är på. Inga kakor följer med (`credentials: "omit"`), inga egna rubriker sätts, och ingenting om dig eller din text skickas. Svaret sparas lokalt i ett dygn, så tjugo öppna Diversia-flikar ger ändå på sin höjd ett anrop. Ingen ny behörighet begärs för det, eftersom GitHub tillåter läsning från andra ursprung.
 

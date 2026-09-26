@@ -32,7 +32,7 @@
     try { pending = ext.runtime.sendMessage({ type: 'dvw-update' }); } catch (e) { return; }
     if (!pending || typeof pending.then !== 'function') return;  // not in an extension context
     pending.then((info) => {
-      if (!info || !info.latest || !bar.isConnected) return;
+      if (!info || !info.newer || !bar.isConnected) return;
       const link = document.createElement('a');
       link.className = 'dvw-update';
       link.href = info.url;
