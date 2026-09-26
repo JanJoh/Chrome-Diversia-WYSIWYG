@@ -94,7 +94,7 @@
       const a = img.closest('a');
       const href = a ? abs(a.getAttribute('href'), base) : '';
       const full = href && IMG_EXT.test(href) ? href : src;
-      out.push({ thumb: src, full, link: href, title: (img.getAttribute('alt') || img.getAttribute('title') || '').trim() });
+      out.push({ thumb: src, full, link: href, via: 'img', title: (img.getAttribute('alt') || img.getAttribute('title') || '').trim() });
     });
     doc.querySelectorAll('[style*="background-image"]').forEach((el) => {
       const m = BG_URL.exec(el.getAttribute('style') || '');
@@ -105,7 +105,7 @@
       const href = a ? abs(a.getAttribute('href'), base) : '';
       const full = href && IMG_EXT.test(href) ? href : src;
       const title = (el.getAttribute('title') || (a && a.getAttribute('title')) || '').trim();
-      out.push({ thumb: src, full, link: href, title });
+      out.push({ thumb: src, full, link: href, via: 'bg', title });
     });
     return out;
   }
@@ -197,6 +197,35 @@
     const all = [...albums.values()];
     const withCover = all.filter((x) => x.cover);
     return { albums: withCover.length ? withCover : all.filter((x) => x.name), images: dedupe(loose) };
+  }
+
+  /*
+   * The full-size address of a picture.
+   *
+   * Diversia signs its image addresses: ?a=2 is the 250 px copy, ?a=1 the
+   * whole thing, and the signature covers those parameters, so a thumbnail
+   * cannot be talked into giving a bigger version. The full-size address
+   * exists only on the picture's own page, which is read once, when you pick
+   * the picture, and remembered afterwards. If anything goes wrong the
+   * thumbnail is used, which is what would have been inserted anyway.
+   */
+  const fullCache = new Map();
+
+  async function fullSizeFor(im) {
+    if (!im || !im.link || !im.full) return im && im.full;
+    if (IMG_EXT.test(im.full) || im.link === im.full) return im.full;   // already a picture
+    if (fullCache.has(im.link)) return fullCache.get(im.link);
+    let best = im.full;
+    try {
+      const page = await fetchDoc(im.link);
+      const cands = dedupe(imagesFrom(page.doc, page.url));
+      // the page shows its own picture with an <img>; the album strip beside
+      // it is drawn as backgrounds, so the <img> is the one worth having
+      const main = cands.find((x) => x.via === 'img');
+      if (main) best = main.full;
+    } catch (e) { /* keep the thumbnail */ }
+    fullCache.set(im.link, best);
+    return best;
   }
 
   // One album, read only when it is opened.
@@ -512,15 +541,28 @@
     gChange.hidden = true;
     gBar.hidden = true;
 
-    const pickThumb = (im, b) => {
+    // Picking shows the thumbnail at once, then quietly swaps in the full-size
+    // address so that what gets inserted doesn't depend on which grid the
+    // picture happened to be shown in.
+    let picking = 0;
+    const pickThumb = async (im, b) => {
       grid.querySelectorAll('.dvw-thumb').forEach((x) => x.classList.remove('dvw-selected'));
       b.classList.add('dvw-selected');
       chosen = im.full; checkedOk = true; updatePreview();
+      const mine = ++picking;
+      const was = gStatus.textContent;
+      if (!IMG_EXT.test(im.full) && im.link && !fullCache.has(im.link)) {
+        gStatus.textContent = t('Hämtar bilden i full storlek…', 'Fetching the full-size picture…');
+      }
+      const full = await fullSizeFor(im);
+      if (mine !== picking) return;   // a later click won
+      gStatus.textContent = was;
+      if (full && full !== chosen) { chosen = full; updatePreview(); }
     };
     const addThumb = (im) => {
       const b = h('button', { type: 'button', class: 'dvw-thumb', title: im.title || im.full, 'data-full': im.full }, [
         h('img', { src: im.thumb, alt: im.title || '', loading: 'lazy', referrerpolicy: 'no-referrer' })]);
-      b.addEventListener('click', () => pickThumb(im, b));
+      b.addEventListener('click', () => { pickThumb(im, b); });
       grid.appendChild(b);
     };
 
@@ -697,5 +739,5 @@
     return m;
   }
 
-  root.DiversiaPickers = { imageDialog, memberDialog, checkImageUrl, scanIndex, scanAlbum, imagesFrom, membersFrom, albumLinks, suggestions, autoUrl, Store };
+  root.DiversiaPickers = { imageDialog, memberDialog, checkImageUrl, scanIndex, scanAlbum, fullSizeFor, imagesFrom, membersFrom, albumLinks, suggestions, autoUrl, Store };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

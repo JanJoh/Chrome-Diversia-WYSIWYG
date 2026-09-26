@@ -272,3 +272,29 @@ test('only your own pages are suggested, not the site-wide ones', async () => {
   });
   assert.deepEqual(chips.map((h) => h.replace(/^https?:\/\/[^/]+/, '')), ['/pic/?id=250']);
 });
+
+test('a picked thumbnail is resolved to the full-size picture', async () => {
+  // Diversia signs its image addresses, so the 250 px copy cannot be rewritten
+  // into the full one: the full address is only on the picture's own page.
+  const got = await page.evaluate(async (b) => {
+    const thumb = b + '/demo/pic.php?a=2';       // a signed thumbnail, not a .jpg
+    const one = await DiversiaPickers.fullSizeFor({
+      thumb, full: thumb, link: b + '/demo/mock-photo.html', via: 'bg',
+    });
+    // asking twice must not read the page twice
+    const two = await DiversiaPickers.fullSizeFor({
+      thumb, full: thumb, link: b + '/demo/mock-photo.html', via: 'bg',
+    });
+    return { one, two };
+  }, base);
+  assert.match(got.one, /\/demo\/img\/photo7\.jpg$/, 'the page\'s own <img>, not the album strip');
+  assert.equal(got.two, got.one, 'remembered');
+});
+
+test('a thumbnail that already links to a picture is left alone', async () => {
+  const got = await page.evaluate((b) => DiversiaPickers.fullSizeFor({
+    thumb: b + '/demo/img/thumb5.jpg', full: b + '/demo/img/photo5.jpg',
+    link: b + '/demo/img/photo5.jpg', via: 'img',
+  }), base);
+  assert.match(got, /photo5\.jpg$/);
+});
