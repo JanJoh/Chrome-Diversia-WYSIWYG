@@ -83,7 +83,7 @@
       const a = img.closest('a');
       const href = a ? abs(a.getAttribute('href'), base) : '';
       const full = href && IMG_EXT.test(href) ? href : src;
-      out.push({ thumb: src, full, title: (img.getAttribute('alt') || img.getAttribute('title') || '').trim() });
+      out.push({ thumb: src, full, link: href, title: (img.getAttribute('alt') || img.getAttribute('title') || '').trim() });
     });
     doc.querySelectorAll('[style*="background-image"]').forEach((el) => {
       const m = BG_URL.exec(el.getAttribute('style') || '');
@@ -94,7 +94,7 @@
       const href = a ? abs(a.getAttribute('href'), base) : '';
       const full = href && IMG_EXT.test(href) ? href : src;
       const title = (el.getAttribute('title') || (a && a.getAttribute('title')) || '').trim();
-      out.push({ thumb: src, full, title });
+      out.push({ thumb: src, full, link: href, title });
     });
     return out;
   }
@@ -141,38 +141,57 @@
   }
 
   /*
-   * Read the gallery one page at a time.
+   * The gallery is read a page at a time, when you ask for it.
    *
-   * The site has anti-scraping measures and there is no hurry: pages are
-   * fetched one after another with a pause between them, and every page is
-   * handed to onProgress as it arrives, so the grid fills up while you look at
-   * it. The album covers on the first page are themselves pictures, so there
-   * is already something to choose from before any album is opened.
+   * Opening the picker reads one page: your gallery's front page, which lists
+   * your albums and already carries a cover picture for each. Opening an album
+   * reads one more. Nothing is fetched speculatively and nothing recurses --
+   * the site has anti-scraping measures, and a click is the only thing that
+   * causes a request.
    */
-  const pause = (ms) => new Promise((r) => setTimeout(r, ms));
-
-  async function scanGallery(startUrl, onProgress, maxPages, delayMs) {
-    maxPages = maxPages || 8;
-    const wait = delayMs === undefined ? 700 : delayMs;
-    const start = abs(startUrl, location.href);
-    const memberId = idOf(start);
-    const seen = new Set(); const queue = [start];
-    const images = []; const imgSeen = new Set(); let pages = 0;
-    while (queue.length && pages < maxPages) {
-      const u = queue.shift();
-      if (seen.has(u)) continue;
-      seen.add(u);
-      if (pages) await pause(wait);   // never two requests back to back
-      pages++;
-      let page;
-      try { page = await fetchDoc(u); } catch (e) { if (pages === 1) throw e; continue; }
-      for (const im of imagesFrom(page.doc, page.url)) {
-        if (M.isHttps(im.full) && !imgSeen.has(im.full)) { imgSeen.add(im.full); images.push(im); }
-      }
-      if (pages === 1) albumLinks(page.doc, page.url, memberId).forEach((l) => { if (!seen.has(l)) queue.push(l); });
-      if (onProgress) onProgress(images, pages, queue.length);
+  function dedupe(list) {
+    const seen = new Set(); const out = [];
+    for (const im of list) {
+      if (!M.isHttps(im.full) || seen.has(im.full)) continue;
+      seen.add(im.full); out.push(im);
     }
-    return images;
+    return out;
+  }
+
+  // The gallery front page: { albums: [{href, name, cover}], images } where
+  // images are any pictures that aren't an album cover.
+  async function scanIndex(startUrl) {
+    const page = await fetchDoc(abs(startUrl, location.href));
+    const links = albumLinks(page.doc, page.url, idOf(page.url));
+    const isAlbum = new Set(links);
+    isAlbum.delete(page.url.split('#')[0]);   // the gallery is not its own album
+    const albums = new Map();
+    page.doc.querySelectorAll('a[href]').forEach((a) => {
+      const href = abs(a.getAttribute('href'), page.url).split('#')[0];
+      if (!isAlbum.has(href)) return;
+      const name = (a.getAttribute('title') || a.textContent || '').replace(/\s+/g, ' ').trim();
+      const rec = albums.get(href) || { href, name: '', cover: '' };
+      if (!rec.name && name && name.length <= 60) rec.name = name;
+      albums.set(href, rec);
+    });
+    const loose = [];
+    for (const im of imagesFrom(page.doc, page.url)) {
+      const rec = albums.get(im.link);
+      if (rec) { if (!rec.cover && M.isHttps(im.thumb)) rec.cover = im.thumb; if (!rec.name && im.title) rec.name = im.title; }
+      else loose.push(im);
+    }
+    // An album worth showing has a cover: that is what tells a real album from
+    // the sorting and paging links sitting beside it. Where a gallery has no
+    // covers at all, fall back to any named link that looked like an album.
+    const all = [...albums.values()];
+    const withCover = all.filter((x) => x.cover);
+    return { albums: withCover.length ? withCover : all.filter((x) => x.name), images: dedupe(loose) };
+  }
+
+  // One album, read only when it is opened.
+  async function scanAlbum(url) {
+    const page = await fetchDoc(abs(url, location.href));
+    return dedupe(imagesFrom(page.doc, page.url));
   }
 
   // ------------------------------------------------------------ friends
@@ -462,32 +481,73 @@
     ]);
 
     // ---- gallery tab
+    //
+    // Two views in one pane: your albums, and the pictures inside one album.
+    // Only a click fetches anything.
     const grid = h('div', { class: 'dvw-grid' });
     const gStatus = h('div', { class: 'dvw-status' });
-    const gallery = sourceRow('gallery', t('Adress till ditt galleri på sajten', 'Address of your gallery page on the site'), '', async (url) => {
-      grid.replaceChildren(); gStatus.className = 'dvw-status'; gStatus.textContent = t('Hämtar…', 'Loading…');
+    const gBack = h('button', { type: 'button', class: 'dvw-btn dvw-back', text: t('\u2190 Alla album', '\u2190 All albums') });
+    const gBar = h('div', { class: 'dvw-crumbs' }, [gBack]);
+    gBar.hidden = true;
+
+    const pickThumb = (im, b) => {
+      grid.querySelectorAll('.dvw-thumb').forEach((x) => x.classList.remove('dvw-selected'));
+      b.classList.add('dvw-selected');
+      chosen = im.full; checkedOk = true; updatePreview();
+    };
+    const addThumb = (im) => {
+      const b = h('button', { type: 'button', class: 'dvw-thumb', title: im.title || im.full, 'data-full': im.full }, [
+        h('img', { src: im.thumb, alt: im.title || '', loading: 'lazy', referrerpolicy: 'no-referrer' })]);
+      b.addEventListener('click', () => pickThumb(im, b));
+      grid.appendChild(b);
+    };
+
+    let indexUrl = '';
+    async function openAlbum(album) {
+      grid.replaceChildren();
+      gBar.hidden = false;
+      gStatus.className = 'dvw-status';
+      gStatus.textContent = t('Hämtar ' + (album.name || 'albumet') + '…', 'Loading ' + (album.name || 'the album') + '…');
       try {
-        const imgs = await scanGallery(url, (list, pages) => {
-          gStatus.textContent = t('Hittade ' + list.length + ' bilder (' + pages + ' sidor lästa)…', 'Found ' + list.length + ' images (' + pages + ' pages read)…');
-        });
+        const imgs = await scanAlbum(album.href);
+        if (!imgs.length) { gStatus.className = 'dvw-status dvw-warn'; gStatus.textContent = t('Inga bilder i det albumet.', 'No images in that album.'); return; }
+        gStatus.textContent = t(album.name + ': ' + imgs.length + ' bilder. Klicka på en för att välja den.',
+          album.name + ': ' + imgs.length + ' images. Click one to choose it.');
+        imgs.forEach(addThumb);
+      } catch (e) { gStatus.className = 'dvw-status dvw-error'; gStatus.textContent = e.message; }
+    }
+
+    async function openIndex(url) {
+      indexUrl = url;
+      grid.replaceChildren();
+      gBar.hidden = true;
+      gStatus.className = 'dvw-status'; gStatus.textContent = t('Hämtar…', 'Loading…');
+      try {
+        const { albums, images } = await scanIndex(url);
         await Store.set('galleryUrl', url);
-        if (!imgs.length) { gStatus.className = 'dvw-status dvw-warn'; gStatus.textContent = t('Hittade inga bilder på den sidan. Är det rätt adress?', 'No images found on that page. Is it the right address?'); return; }
-        gStatus.textContent = t(imgs.length + ' bilder. Klicka på en för att välja den.', imgs.length + ' images. Click one to choose it.');
-        imgs.forEach((im) => {
-          const b = h('button', { type: 'button', class: 'dvw-thumb', title: im.title || im.full, 'data-full': im.full }, [
-            h('img', { src: im.thumb, alt: im.title || '', loading: 'lazy', referrerpolicy: 'no-referrer' })]);
-          b.addEventListener('click', () => {
-            grid.querySelectorAll('.dvw-thumb').forEach((x) => x.classList.remove('dvw-selected'));
-            b.classList.add('dvw-selected');
-            chosen = im.full; checkedOk = true; updatePreview();
-          });
+        if (!albums.length && !images.length) {
+          gStatus.className = 'dvw-status dvw-warn';
+          gStatus.textContent = t('Hittade inga bilder på den sidan. Är det rätt adress?', 'No images found on that page. Is it the right address?');
+          return;
+        }
+        gStatus.textContent = albums.length
+          ? t(albums.length + ' album. Klicka på ett för att se bilderna.', albums.length + ' albums. Click one to see its images.')
+          : t(images.length + ' bilder. Klicka på en för att välja den.', images.length + ' images. Click one to choose it.');
+        albums.forEach((al) => {
+          const b = h('button', { type: 'button', class: 'dvw-albumcard', title: al.name }, [
+            al.cover ? h('img', { src: al.cover, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' }) : h('span', { class: 'dvw-albumempty', text: '\u{1F5BC}' }),
+            h('span', { class: 'dvw-albumname', text: al.name || t('Album', 'Album') }),
+          ]);
+          b.addEventListener('click', () => openAlbum(al));
           grid.appendChild(b);
         });
-      } catch (e) {
-        gStatus.className = 'dvw-status dvw-error'; gStatus.textContent = e.message;
-      }
-    });
-    const galleryPane = h('div', {}, [gallery.el, gStatus, grid]);
+        images.forEach(addThumb);
+      } catch (e) { gStatus.className = 'dvw-status dvw-error'; gStatus.textContent = e.message; }
+    }
+
+    gBack.addEventListener('click', () => { if (indexUrl) openIndex(indexUrl); });
+    const gallery = sourceRow('gallery', t('Adress till ditt galleri på sajten', 'Address of your gallery page on the site'), '', openIndex);
+    const galleryPane = h('div', {}, [gallery.el, gBar, gStatus, grid]);
 
     // ---- URL tab
     const urlInput = h('input', { type: 'url', class: 'dvw-input dvw-img-url', placeholder: 'https://…' });
@@ -610,5 +670,5 @@
     return m;
   }
 
-  root.DiversiaPickers = { imageDialog, memberDialog, checkImageUrl, scanGallery, imagesFrom, membersFrom, albumLinks, suggestions, autoUrl, Store };
+  root.DiversiaPickers = { imageDialog, memberDialog, checkImageUrl, scanIndex, scanAlbum, imagesFrom, membersFrom, albumLinks, suggestions, autoUrl, Store };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

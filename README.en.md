@@ -32,9 +32,10 @@ The interface is in Swedish when the page is Swedish, and in English otherwise.
 
 Click **Bild** to open the image picker. It has two tabs:
 
-- **My gallery** reads your gallery page on the site and shows its images as thumbnails.
+- **My gallery** reads your gallery page on the site and shows your **albums** first, each with its cover and name. Click an album to see the pictures in it, and **← All albums** to come back.
   - **It stays inside your gallery.** The site's shortcuts to everyone's pictures ("100.000-tals bilder", "Persongalleriet") look exactly like album links but are never followed, and neither are the profile, guestbook, diary or friends list, which sit in the same folder and carry the same member number.
-  - **Albums are read one at a time, gently.** The site has anti-scraping measures and there is no hurry: one page at a time with a pause between them, up to 8 pages, and the grid fills while you watch. The album covers on the first page are pictures in themselves, so there is something to choose from straight away.
+  - **Only what you click is fetched.** Opening the picker reads one page: your gallery's front page, which already carries each album's name and cover. Opening an album reads one more. Nothing is fetched ahead of time and nothing recurses — the site has anti-scraping measures, and only a click causes a request.
+  - Pictures sitting loose on the gallery page, outside any album, are shown below the albums.
   - Thumbnails drawn as a background image, which is what Diversia does, are read just as well as plain `<img>`.
   - It skips smileys and icons, and uses the full-size image when a thumbnail links to one.
   - **The address usually finds itself.** The site's own menu links to your gallery, and a personal page carries your member number where the site-wide one doesn't (`/pic/?id=250` against `/pic/`). That link is chosen straight away, so the gallery is already loaded when the picker opens.

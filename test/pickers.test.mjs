@@ -29,15 +29,33 @@ beforeEach(async () => {
 
 const value = () => page.locator('textarea[name=text]').inputValue();
 
-test('gallery: finds images across album pages, skips icons, inserts with size/align/border', async () => {
+test('gallery: albums first, then the pictures inside one, with a way back', async () => {
   await page.click('.dvw-image');
   const dlg = page.locator('.dvw-modal');
   await dlg.waitFor();
   // no saved gallery yet: suggestions from the site's own menu are offered
   await dlg.locator('.dvw-tab[data-tab=gallery]').click();
   await dlg.locator('.dvw-chip', { hasText: 'Mina bilder' }).click();
-  await dlg.locator('.dvw-thumb').nth(6).waitFor();
-  assert.equal(await dlg.locator('.dvw-thumb').count(), 7, 'photo1 de-duplicated, smiley skipped, album page read');
+
+  // the front page: loose pictures and the albums, read in one request
+  await dlg.locator('.dvw-albumcard').waitFor();
+  assert.equal(await dlg.locator('.dvw-thumb').count(), 4, 'four loose pictures, smiley skipped');
+  assert.equal(await dlg.locator('.dvw-albumcard').count(), 1, 'one album');
+  assert.equal((await dlg.locator('.dvw-albumname').textContent()).trim(), 'Semester');
+  assert.ok(await dlg.locator('.dvw-back').isHidden(), 'nothing to go back to yet');
+
+  // opening the album reads that page, and only that page
+  await dlg.locator('.dvw-albumcard').click();
+  await dlg.locator('.dvw-thumb[data-full$="photo5.jpg"]').waitFor();
+  assert.equal(await dlg.locator('.dvw-thumb').count(), 4, 'the album\'s own pictures');
+  assert.equal(await dlg.locator('.dvw-albumcard').count(), 0, 'albums replaced by their contents');
+  assert.ok(await dlg.locator('.dvw-back').isVisible(), 'a way back');
+
+  // and back again
+  await dlg.locator('.dvw-back').click();
+  await dlg.locator('.dvw-albumcard').waitFor();
+  assert.equal(await dlg.locator('.dvw-thumb').count(), 4);
+
   await dlg.locator('.dvw-thumb[data-full$="photo2.jpg"]').click();
   await dlg.locator('.dvw-img-size').selectOption('50%');
   await dlg.locator('.dvw-img-align').selectOption('center');
@@ -60,9 +78,11 @@ test('gallery: finds images across album pages, skips icons, inserts with size/a
   await dlg.locator('.dvw-danger').click();
   assert.equal(await value(), 'Start');
 
-  // the gallery address is remembered and loads straight away next time
+  // the gallery address is remembered and loads straight away next time,
+  // back at the album list rather than wherever we left off
   await page.click('.dvw-image');
-  await dlg.locator('.dvw-thumb').nth(6).waitFor();
+  await dlg.locator('.dvw-albumcard').waitFor();
+  assert.equal(await dlg.locator('.dvw-thumb').count(), 4);
   await dlg.locator('.dvw-x').click();
 });
 
@@ -144,7 +164,7 @@ test('member picker: friends list, search, keyboard, number fallback, wrapping a
 });
 
 test('pickers refuse other sites (same-origin only)', async () => {
-  const err = await page.evaluate(() => DiversiaPickers.scanGallery('https://example.com/gallery').then(() => '', (e) => e.message));
+  const err = await page.evaluate(() => DiversiaPickers.scanIndex('https://example.com/gallery').then(() => '', (e) => e.message));
   assert.match(err, /samma sajt/);
 });
 
