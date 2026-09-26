@@ -87,7 +87,7 @@ Båda väljarna läser sidor enbart från sajten du är på, som den inloggade d
 
 Tillägget finns inte i någon webbläsarbutik, så du installerar det själv från en zip-fil. Det tar ungefär en minut, och du behöver inte kunna något om kod.
 
-**1. Hämta filen.** Öppna [senaste versionen](https://github.com/JanJoh/Chrome-Diversia-WYSIWYG/releases/latest) och ladda ner den som passar din webbläsare:
+**1. Hämta filen.** Öppna [senaste versionen](https://github.com/JanJoh/Diversia-WYSIWYG/releases/latest) och ladda ner den som passar din webbläsare:
 
 | Fil att ladda ner | För |
 |---|---|

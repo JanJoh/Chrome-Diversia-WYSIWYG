@@ -36,7 +36,7 @@ test('differing lengths compare on the missing part as zero', () => {
 });
 
 test('the check points at this repository and is switchable', () => {
-  assert.equal(V.REPO, 'JanJoh/Chrome-Diversia-WYSIWYG');
+  assert.equal(V.REPO, 'JanJoh/Diversia-WYSIWYG');
   assert.ok(V.RELEASE_API.startsWith('https://api.github.com/repos/'));
   assert.ok(V.RELEASES_URL.endsWith('/releases'));
   assert.equal(V.CHECK_AFTER_MS, 24 * 60 * 60 * 1000);

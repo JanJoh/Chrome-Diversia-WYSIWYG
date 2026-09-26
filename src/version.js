@@ -13,7 +13,7 @@
 (function (root) {
   'use strict';
 
-  const REPO = 'JanJoh/Chrome-Diversia-WYSIWYG';
+  const REPO = 'JanJoh/Diversia-WYSIWYG';
 
   // "v0.4.0" -> [0, 4, 0]. Extension versions are 1-4 dot-separated integers.
   function parseVersion(v) {

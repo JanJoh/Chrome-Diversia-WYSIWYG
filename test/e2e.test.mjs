@@ -171,7 +171,7 @@ test('extension: a newer release is announced next to the switch, and can be swi
     const notice = page.locator('.dvw-update');
     await notice.waitFor({ timeout: 15000 });
     assert.match(await notice.textContent(), /9\.9\.9/);
-    assert.match(await notice.getAttribute('href'), /JanJoh\/Chrome-Diversia-WYSIWYG\/releases$/);
+    assert.match(await notice.getAttribute('href'), /JanJoh\/Diversia-WYSIWYG\/releases$/);
 
     // An older or equal release says nothing at all.
     await seed('v0.0.1');

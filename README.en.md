@@ -89,7 +89,7 @@ Both pickers read pages only from the site you're on, as the logged-in you, and 
 
 The extension isn't in any browser store, so you install it yourself from a zip file. It takes about a minute and needs no knowledge of code.
 
-**1. Download the file.** Open the [latest release](https://github.com/JanJoh/Chrome-Diversia-WYSIWYG/releases/latest) and get the one for your browser:
+**1. Download the file.** Open the [latest release](https://github.com/JanJoh/Diversia-WYSIWYG/releases/latest) and get the one for your browser:
 
 | File to download | For |
 |---|---|
