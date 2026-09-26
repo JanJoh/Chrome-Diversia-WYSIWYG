@@ -184,3 +184,31 @@ test('a site that exposes no personal address is left to the old paste-an-addres
   // the demo page links "Mina bilder" without any id, so nothing is assumed
   assert.equal(await page.evaluate(() => DiversiaPickers.autoUrl('gallery')), '');
 });
+
+test('thumbnails drawn as background-image are read, not just <img>', async () => {
+  // how diversia.social draws a gallery: the link itself carries the picture
+  const found = await page.evaluate(() => {
+    const html = '<a href="/pic/?bild=1" style="width:40%;background-image:url(https://cc.example.com/pres/a.jpg);background-size:cover"></a>'
+      + '<a href="/pic/?bild=2" style="background-image:url(\'https://cc.example.com/pres/b.jpg\')"></a>'
+      + '<div style="background-image:url(https://cc.example.com/pres/site-logo.png)"></div>';
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return DiversiaPickers.imagesFrom(doc, 'https://example.com/pic/?id=250').map((i) => i.thumb);
+  });
+  // the logo is skipped by the same rule that skips smileys and icons
+  assert.deepEqual(found, ['https://cc.example.com/pres/a.jpg', 'https://cc.example.com/pres/b.jpg']);
+});
+
+test("the site's own shortcuts are never followed out of your gallery", async () => {
+  const links = await page.evaluate(() => {
+    const html = '<a href="/pic/?bild=9" style="background-image:url(https://cc.example.com/pres/cover.jpg)"></a>'
+      + '<a href="/pic/?id=250&sida=2">Nästa sida</a>'
+      + '<a href="/pic/">Bilder, 100.000-tals bilder</a>'
+      + '<a href="/pic/?bild=82628">Persongalleriet</a>'
+      + '<a href="/g.php?a=edit&id=250">✎ Redigera</a>';
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return DiversiaPickers.albumLinks(doc, 'https://example.com/pic/?id=250', '250');
+  });
+  // an album cover and your own next page; not the site-wide gallery, not
+  // "Persongalleriet", and not the upload/edit controls outside /pic/
+  assert.deepEqual(links, ['https://example.com/pic/?bild=9', 'https://example.com/pic/?id=250&sida=2']);
+});

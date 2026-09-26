@@ -68,6 +68,10 @@
   const IMG_EXT = /\.(jpe?g|png|gif|webp|avif)(\?|#|$)/i;
   const SKIP_IMG = /(smil(ey|ie)|emoji|emoticon|icon|spacer|pixel|blank\.|button|arrow|logo|badge|flag|loading)/i;
 
+  // Diversia draws gallery thumbnails as inline background-image on the link
+  // itself rather than with <img>, so both have to be read.
+  const BG_URL = /background-image\s*:\s*url\((['"]?)([^)'"]+)\1\)/i;
+
   function imagesFrom(doc, base) {
     const out = [];
     doc.querySelectorAll('img').forEach((img) => {
@@ -81,36 +85,92 @@
       const full = href && IMG_EXT.test(href) ? href : src;
       out.push({ thumb: src, full, title: (img.getAttribute('alt') || img.getAttribute('title') || '').trim() });
     });
+    doc.querySelectorAll('[style*="background-image"]').forEach((el) => {
+      const m = BG_URL.exec(el.getAttribute('style') || '');
+      if (!m) return;
+      const src = abs(m[2], base);
+      if (!src || SKIP_IMG.test(src)) return;
+      const a = el.closest('a');
+      const href = a ? abs(a.getAttribute('href'), base) : '';
+      const full = href && IMG_EXT.test(href) ? href : src;
+      const title = (el.getAttribute('title') || (a && a.getAttribute('title')) || '').trim();
+      out.push({ thumb: src, full, title });
+    });
     return out;
   }
 
   const ALBUM_LINK = /(album|galleri|gallery|bilder|foto|photos|[?&](page|sida|p|start|offset)=\d+)/i;
-  function albumLinks(doc, base) {
-    const origin = new URL(base).origin;
+
+  /*
+   * Pages worth reading next, and nothing else.
+   *
+   * When the gallery address carries your member number, only two kinds of
+   * link count: one that carries the same number, and an album cover (a link
+   * that is itself a thumbnail). That leaves out the site's own shortcuts --
+   * "100.000-tals bilder", "Persongalleriet" -- which otherwise look exactly
+   * like album links and lead into everybody else's pictures. Nothing outside
+   * the gallery's own folder is followed either, which rules out the edit and
+   * upload controls sitting next to each album.
+   */
+  function albumLinks(doc, base, memberId) {
+    const from = new URL(base);
+    const dir = from.pathname.replace(/[^/]*$/, '');
     const out = [];
     doc.querySelectorAll('a[href]').forEach((a) => {
       const href = abs(a.getAttribute('href'), base);
-      if (!href || IMG_EXT.test(href) || !href.startsWith(origin)) return;
-      if (ALBUM_LINK.test(href) || ALBUM_LINK.test(a.textContent || '')) out.push(href.split('#')[0]);
+      if (!href || IMG_EXT.test(href) || !href.startsWith(from.origin)) return;
+      const path = new URL(href).pathname;
+      if (memberId) {
+        // Only another view of this same page counts: an album cover, or a
+        // link carrying your member number. The rest of what sits next to a
+        // gallery -- profile, guestbook, diary, interview, friends list -- is
+        // reached by relative links that land in the same folder and carry the
+        // same number, so the folder alone is not a narrow enough test.
+        if (path !== from.pathname) return;
+        const mine = new RegExp('(?:^|[^0-9])' + memberId + '(?![0-9])').test(href);
+        const cover = BG_URL.test(a.getAttribute('style') || '') ||
+          !!a.querySelector('[style*="background-image"], img');
+        if (!mine && !cover) return;
+      } else {
+        if (path.replace(/[^/]*$/, '') !== dir) return;
+        if (!(ALBUM_LINK.test(href) || ALBUM_LINK.test(a.textContent || ''))) return;
+      }
+      out.push(href.split('#')[0]);
     });
     return [...new Set(out)];
   }
 
-  async function scanGallery(startUrl, onProgress, maxPages) {
+  /*
+   * Read the gallery one page at a time.
+   *
+   * The site has anti-scraping measures and there is no hurry: pages are
+   * fetched one after another with a pause between them, and every page is
+   * handed to onProgress as it arrives, so the grid fills up while you look at
+   * it. The album covers on the first page are themselves pictures, so there
+   * is already something to choose from before any album is opened.
+   */
+  const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  async function scanGallery(startUrl, onProgress, maxPages, delayMs) {
     maxPages = maxPages || 8;
-    const seen = new Set(); const queue = [abs(startUrl, location.href)];
+    const wait = delayMs === undefined ? 700 : delayMs;
+    const start = abs(startUrl, location.href);
+    const memberId = idOf(start);
+    const seen = new Set(); const queue = [start];
     const images = []; const imgSeen = new Set(); let pages = 0;
     while (queue.length && pages < maxPages) {
       const u = queue.shift();
       if (seen.has(u)) continue;
-      seen.add(u); pages++;
+      seen.add(u);
+      if (pages) await pause(wait);   // never two requests back to back
+      pages++;
       let page;
       try { page = await fetchDoc(u); } catch (e) { if (pages === 1) throw e; continue; }
       for (const im of imagesFrom(page.doc, page.url)) {
         if (M.isHttps(im.full) && !imgSeen.has(im.full)) { imgSeen.add(im.full); images.push(im); }
       }
-      if (pages === 1) albumLinks(page.doc, page.url).forEach((l) => { if (!seen.has(l)) queue.push(l); });
-      if (onProgress) onProgress(images, pages);
+      if (pages === 1) albumLinks(page.doc, page.url, memberId).forEach((l) => { if (!seen.has(l)) queue.push(l); });
+      if (onProgress) onProgress(images, pages, queue.length);
     }
     return images;
   }

@@ -31,7 +31,9 @@ Tillägget körs automatiskt på `diversia.social` och `diversia.se`. På andra 
 Klicka på **Bild** för att öppna bildväljaren. Den har två flikar:
 
 - **Mitt galleri** läser din gallerisida på sajten och visar bilderna som miniatyrer.
-  - Den läser även album- och "nästa sida"-länkar därifrån, upp till 8 sidor.
+  - **Den håller sig i ditt galleri.** Sajtens genvägar till allas bilder ("100.000-tals bilder", "Persongalleriet") ser ut precis som albumlänkar men följs aldrig, och inte heller profil, gästbok, dagbok eller vänlista, som ligger i samma mapp och bär samma medlemsnummer.
+  - **Album läses ett i taget, lugnt.** Sajten har skydd mot skrapning och det är ingen brådska: en sida i taget med en paus emellan, upp till 8 sidor, och rutnätet fylls på medan du tittar. Albumomslagen på första sidan är bilder i sig, så det finns något att välja bland direkt.
+  - Miniatyrer som ritas som bakgrundsbild, vilket Diversia gör, läses lika bra som vanliga `<img>`.
   - Den hoppar över smileys och ikoner, och använder bilden i full storlek när en miniatyr länkar till en sådan.
   - **Adressen hittas oftast av sig själv.** Sajtens egen meny länkar till ditt galleri, och en personlig sida bär ditt medlemsnummer där den gemensamma inte gör det (`/pic/?id=250` mot `/pic/`). Den länken väljs direkt, så galleriet är redan inläst när väljaren öppnas.
   - Hittas ingen sådan länk klistrar du in adressen första gången, eller klickar på ett av förslagen från menyn ("Mina bilder", "Galleri"…). Sedan kommer den ihåg adressen.
