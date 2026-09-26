@@ -1,6 +1,6 @@
 {
   "name": "diversia-wysiwyg",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Webbläsartillägg (Chrome, Firefox, Safari): visuell redigering (WYSIWYG) för Diversias textkod",
   "private": true,
   "license": "MIT",
