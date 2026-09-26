@@ -81,7 +81,7 @@ Click **@** to open the member picker.
 - **Number:** the other tab takes a member number directly.
 - **Selected text:** if you had text selected, that text becomes the link. Otherwise the member's name is used.
 
-Both pickers read pages only from the site you're on, as the logged-in you, and never contact anything else.
+Both pickers read pages only from the site you're on, as the logged-in you. The only thing the extension fetches from anywhere else is the [version check](#version-check), which can be switched off.
 
 > **Check once:** the member picker reads the number from profile links (`…?id=12345`, `/medlem/12345`…). On most sites that's the same number as the member number shown on the presentation page, but verify it with one friend the first time.
 

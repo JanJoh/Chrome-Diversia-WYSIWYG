@@ -79,7 +79,7 @@ Klicka på **@** för att öppna medlemsväljaren.
 - **Nummer:** den andra fliken tar ett medlemsnummer direkt.
 - **Markerad text:** hade du markerat text blir den texten länken. Annars används medlemmens namn.
 
-Båda väljarna läser sidor enbart från sajten du är på, som den inloggade du, och kontaktar aldrig något annat.
+Båda väljarna läser sidor enbart från sajten du är på, som den inloggade du. Det enda tillägget hämtar någon annanstans ifrån är [versionskontrollen](#versionskontroll), som går att stänga av.
 
 > **Kontrollera en gång:** medlemsväljaren läser numret ur profillänkar (`…?id=12345`, `/medlem/12345`…). På de flesta sajter är det samma nummer som medlemsnumret på presentationssidan, men kontrollera med en vän första gången.
 
