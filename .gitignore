@@ -1,4 +1,25 @@
+# Dependencies and build output
 node_modules/
 dist/
-.DS_Store
+
+# Test and tooling leftovers
+test-results/
+playwright-report/
+blob-report/
+coverage/
 *.log
+npm-debug.log*
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Editor and OS
+.DS_Store
+.AppleDouble
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~

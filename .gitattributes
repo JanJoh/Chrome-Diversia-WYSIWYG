@@ -1,0 +1,24 @@
+# Normalise line endings: LF in the repository, whatever the checkout wants.
+* text=auto eol=lf
+
+# Keep these exactly as they are.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.zip binary
+
+# Swedish text carries å ä ö; make sure diffs treat these as text.
+*.md   text diff=markdown
+*.js   text diff=javascript
+*.mjs  text diff=javascript
+*.json text
+*.css  text diff=css
+*.html text diff=html
+*.txt  text
+
+# Repository plumbing has no business in a `git archive` export.
+.gitattributes export-ignore
+.gitignore     export-ignore
+.editorconfig  export-ignore
