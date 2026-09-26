@@ -66,7 +66,15 @@
 
   // ------------------------------------------------------------ gallery
   const IMG_EXT = /\.(jpe?g|png|gif|webp|avif)(\?|#|$)/i;
-  const SKIP_IMG = /(smil(ey|ie)|emoji|emoticon|icon|spacer|pixel|blank\.|button|arrow|logo|badge|flag|loading)/i;
+  // Site furniture that turns up among the pictures: reaction emojis and stars,
+  // the avatars of whoever commented, and the placeholder shown where an image
+  // is withheld. On Diversia these are the black square and the star.
+  const SKIP_IMG = new RegExp([
+    'smil(ey|ie)', 'emoji', 'emoticon', 'icon', 'spacer', 'pixel', 'blank\\.',
+    'button', 'arrow', 'logo', 'badge', 'flag', 'loading',
+    'star', '/layout/', 'forbidden', 'placeholder', 'avatar', 'pic_prof',
+    'banner', '/bnrs?/', '/ads?/',
+  ].join('|'), 'i');
 
   // Diversia draws gallery thumbnails as inline background-image on the link
   // itself rather than with <img>, so both have to be read.
@@ -230,7 +238,13 @@
       if (!href || !href.startsWith(location.origin) || !text || text.length > 40) return;
       if (re.test(text) && !out.has(href)) out.set(href, text);
     });
-    return [...out.entries()].slice(0, 6).map(([href, text]) => ({ href, text }));
+    const list = [...out.entries()].map(([href, text]) => ({ href, text }));
+    // Where the site identifies you by number, only your own pages are worth
+    // offering. The shortcuts to everyone's pictures ("100.000-tals bilder",
+    // "Persongalleriet") match the same words but are nobody's gallery.
+    const me = ownId();
+    const mine = me ? list.filter((x) => new RegExp('(?:^|[^0-9])' + me + '(?![0-9])').test(x.href)) : [];
+    return (mine.length ? mine : list).slice(0, 6);
   }
 
   /*
@@ -487,7 +501,12 @@
     const grid = h('div', { class: 'dvw-grid' });
     const gStatus = h('div', { class: 'dvw-status' });
     const gBack = h('button', { type: 'button', class: 'dvw-btn dvw-back', text: t('\u2190 Alla album', '\u2190 All albums') });
-    const gBar = h('div', { class: 'dvw-crumbs' }, [gBack]);
+    // Once a gallery is loaded the address row has done its job and only gets
+    // in the way, so it steps aside behind a link.
+    const gChange = h('button', { type: 'button', class: 'dvw-btn dvw-changeurl', text: t('Ändra galleriadress', 'Change gallery address') });
+    const gBar = h('div', { class: 'dvw-crumbs' }, [gBack, gChange]);
+    gBack.hidden = true;
+    gChange.hidden = true;
     gBar.hidden = true;
 
     const pickThumb = (im, b) => {
@@ -505,7 +524,7 @@
     let indexUrl = '';
     async function openAlbum(album) {
       grid.replaceChildren();
-      gBar.hidden = false;
+      gBar.hidden = false; gBack.hidden = false;
       gStatus.className = 'dvw-status';
       gStatus.textContent = t('Hämtar ' + (album.name || 'albumet') + '…', 'Loading ' + (album.name || 'the album') + '…');
       try {
@@ -520,11 +539,12 @@
     async function openIndex(url) {
       indexUrl = url;
       grid.replaceChildren();
-      gBar.hidden = true;
+      gBack.hidden = true;
       gStatus.className = 'dvw-status'; gStatus.textContent = t('Hämtar…', 'Loading…');
       try {
         const { albums, images } = await scanIndex(url);
         await Store.set('galleryUrl', url);
+        gallery.el.hidden = true; gChange.hidden = false; gBar.hidden = false;
         if (!albums.length && !images.length) {
           gStatus.className = 'dvw-status dvw-warn';
           gStatus.textContent = t('Hittade inga bilder på den sidan. Är det rätt adress?', 'No images found on that page. Is it the right address?');
@@ -546,6 +566,10 @@
     }
 
     gBack.addEventListener('click', () => { if (indexUrl) openIndex(indexUrl); });
+    gChange.addEventListener('click', () => {
+      gallery.el.hidden = false; gChange.hidden = true;
+      gallery.input.focus(); gallery.input.select();
+    });
     const gallery = sourceRow('gallery', t('Adress till ditt galleri på sajten', 'Address of your gallery page on the site'), '', openIndex);
     const galleryPane = h('div', {}, [gallery.el, gBar, gStatus, grid]);
 

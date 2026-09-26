@@ -37,9 +37,9 @@ Click **Bild** to open the image picker. It has two tabs:
   - **Only what you click is fetched.** Opening the picker reads one page: your gallery's front page, which already carries each album's name and cover. Opening an album reads one more. Nothing is fetched ahead of time and nothing recurses — the site has anti-scraping measures, and only a click causes a request.
   - Pictures sitting loose on the gallery page, outside any album, are shown below the albums.
   - Thumbnails drawn as a background image, which is what Diversia does, are read just as well as plain `<img>`.
-  - It skips smileys and icons, and uses the full-size image when a thumbnail links to one.
+  - **It shows pictures only.** The site's furniture is filtered out: smileys and reaction emojis, the star and the black square laid over the pictures, the placeholder for a withheld image, banners, icons — and the avatars of whoever commented, which otherwise land among your own pictures. It uses the full-size image when a thumbnail links to one.
   - **The address usually finds itself.** The site's own menu links to your gallery, and a personal page carries your member number where the site-wide one doesn't (`/pic/?id=250` against `/pic/`). That link is chosen straight away, so the gallery is already loaded when the picker opens.
-  - If no such link exists, paste the address the first time, or click one of the suggestions from the menu ("Mina bilder", "Galleri"…). It's remembered after that.
+  - If no such link exists, paste the address the first time, or click one of the suggestions from the menu. Only your own pages are suggested, never the site's shortcuts to everyone's pictures. Once the gallery has loaded the address row disappears; **Change gallery address** brings it back.
 - **Image address (URL)** takes any image link and checks it first:
   - rejects files on your own computer (`data:`, `blob:`, `file:`) and things that aren't web addresses
   - switches `http://` to `https://`, since the site requires it

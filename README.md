@@ -35,9 +35,9 @@ Klicka på **Bild** för att öppna bildväljaren. Den har två flikar:
   - **Bara det du klickar på hämtas.** Att öppna väljaren läser en sida: din gallerisida, som redan innehåller albumens namn och omslag. Att öppna ett album läser en sida till. Ingenting hämtas i förväg och ingenting följs rekursivt — sajten har skydd mot skrapning, och bara ett klick gör en förfrågan.
   - Bilder som ligger löst på gallerisidan, utanför albumen, visas direkt under albumen.
   - Miniatyrer som ritas som bakgrundsbild, vilket Diversia gör, läses lika bra som vanliga `<img>`.
-  - Den hoppar över smileys och ikoner, och använder bilden i full storlek när en miniatyr länkar till en sådan.
+  - **Den visar bara bilder.** Sajtens inredning sorteras bort: smileys och reaktionsemojier, stjärnan och den svarta rutan som ligger över bilderna, platshållaren för en bild som inte visas, bannrar, ikoner — och profilbilderna på dem som kommenterat, som annars hamnar bland dina egna bilder. Den använder bilden i full storlek när en miniatyr länkar till en sådan.
   - **Adressen hittas oftast av sig själv.** Sajtens egen meny länkar till ditt galleri, och en personlig sida bär ditt medlemsnummer där den gemensamma inte gör det (`/pic/?id=250` mot `/pic/`). Den länken väljs direkt, så galleriet är redan inläst när väljaren öppnas.
-  - Hittas ingen sådan länk klistrar du in adressen första gången, eller klickar på ett av förslagen från menyn ("Mina bilder", "Galleri"…). Sedan kommer den ihåg adressen.
+  - Hittas ingen sådan länk klistrar du in adressen första gången, eller klickar på ett av förslagen från menyn. Bara dina egna sidor föreslås, aldrig sajtens genvägar till allas bilder. När galleriet är inläst försvinner adressraden; **Ändra galleriadress** tar fram den igen.
 - **Bildadress (URL)** tar emot vilken bildlänk som helst och kontrollerar den först:
   - avvisar filer på din egen dator (`data:`, `blob:`, `file:`) och sådant som inte är webbadresser
   - byter `http://` mot `https://`, eftersom sajten kräver det

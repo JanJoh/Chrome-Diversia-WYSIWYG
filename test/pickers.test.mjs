@@ -43,6 +43,9 @@ test('gallery: albums first, then the pictures inside one, with a way back', asy
   assert.equal(await dlg.locator('.dvw-albumcard').count(), 1, 'one album');
   assert.equal((await dlg.locator('.dvw-albumname').textContent()).trim(), 'Semester');
   assert.ok(await dlg.locator('.dvw-back').isHidden(), 'nothing to go back to yet');
+  // the address row has done its job and steps aside
+  assert.ok(await dlg.locator('.dvw-source-row').isHidden(), 'address row hidden once loaded');
+  assert.ok(await dlg.locator('.dvw-changeurl').isVisible(), 'but reachable again');
 
   // opening the album reads that page, and only that page
   await dlg.locator('.dvw-albumcard').click();
@@ -231,4 +234,39 @@ test("the site's own shortcuts are never followed out of your gallery", async ()
   // an album cover and your own next page; not the site-wide gallery, not
   // "Persongalleriet", and not the upload/edit controls outside /pic/
   assert.deepEqual(links, ['https://example.com/pic/?bild=9', 'https://example.com/pic/?id=250&sida=2']);
+});
+
+test('site furniture is kept out of the pictures', async () => {
+  // what a diversia album page carries besides its pictures: the commenters'
+  // avatars, reaction emojis, the star and black square used as overlays, the
+  // placeholder for a withheld image, and site banners
+  const kept = await page.evaluate(() => {
+    const html = [
+      '<a href="/pic/?bild=1" style="background-image:url(https://cc.example.com/pres/pic.php?id=1)"></a>',
+      '<a href="/pic/?bild=2" style="background-image:url(https://cc.example.com/pres/pic_prof.php?id=9)"></a>',
+      '<div style="background-image:url(https://cc.example.com/pres/layout/blackheart.png)"></div>',
+      '<div style="background-image:url(https://cc.example.com/pres/layout/misc/whitestar.svg)"></div>',
+      '<div style="background-image:url(https://cc.example.com/pres/layout/misc/emojis/u1f44d.svg)"></div>',
+      '<div style="background-image:url(https://cc.example.com/pres/bild_def/_forbidden.png)"></div>',
+      '<div style="background-image:url(https://cc.example.com/pres/bnrs/797.jpg)"></div>',
+    ].join('');
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return DiversiaPickers.imagesFrom(doc, 'https://example.com/pic/?id=250').map((i) => i.thumb);
+  });
+  assert.deepEqual(kept, ['https://cc.example.com/pres/pic.php?id=1']);
+});
+
+test('only your own pages are suggested, not the site-wide ones', async () => {
+  const chips = await page.evaluate(() => {
+    const nav = document.createElement('nav');
+    nav.innerHTML = '<a href="/pic/?id=250">\u{1F5BC}️ Bilder</a>'
+      + '<a href="/pic/">Bilder, 100.000-tals bilder</a>'
+      + '<a href="/pic/?bild=82628">Persongalleriet</a>'
+      + '<a href="/profil.php?id=250">Jungleland</a>';
+    document.body.appendChild(nav);
+    const r = DiversiaPickers.suggestions('gallery').map((x) => x.href);
+    nav.remove();
+    return r;
+  });
+  assert.deepEqual(chips.map((h) => h.replace(/^https?:\/\/[^/]+/, '')), ['/pic/?id=250']);
 });
