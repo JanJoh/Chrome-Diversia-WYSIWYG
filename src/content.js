@@ -10,6 +10,7 @@
   const sv = (document.documentElement.lang || navigator.language || 'sv').startsWith('sv');
   const LABEL_ON = sv ? 'Visuell redigering: PÅ' : 'Visual editing: ON';
   const LABEL_OFF = sv ? 'Visuell redigering: AV' : 'Visual editing: OFF';
+  const LABEL_UPDATE = sv ? 'Version {v} finns att hämta' : 'Version {v} is available';
   const KEY = 'dvw-auto';
 
   const ext = globalThis.browser || globalThis.chrome;   // Firefox/Safari expose `browser`, Chrome `chrome`
@@ -19,6 +20,28 @@
     },
     set(v) { try { ext.storage.local.set({ [KEY]: v }).catch(() => {}); } catch (e) { /* not in extension context */ } },
   };
+
+  // The extension has no popup to put a notice in (clicking the icon injects
+  // the editor), so a new release is announced next to the switch instead.
+  // Asked once per page; the background script caches the answer for a day.
+  let updateAsked = false;
+  function maybeAddUpdateNotice(bar) {
+    if (updateAsked) return;
+    updateAsked = true;
+    let pending;
+    try { pending = ext.runtime.sendMessage({ type: 'dvw-update' }); } catch (e) { return; }
+    if (!pending || typeof pending.then !== 'function') return;  // not in an extension context
+    pending.then((info) => {
+      if (!info || !info.latest || !bar.isConnected) return;
+      const link = document.createElement('a');
+      link.className = 'dvw-update';
+      link.href = info.url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = LABEL_UPDATE.replace('{v}', info.latest);
+      bar.appendChild(link);
+    }, () => {});
+  }
 
   function eligible(ta) {
     if (ta.dataset.dvwSwitch || ta.readOnly || ta.disabled) return false;
@@ -36,6 +59,7 @@
     button.className = 'dvw-switch';
     bar.appendChild(button);
     ta.parentNode.insertBefore(bar, ta);
+    maybeAddUpdateNotice(bar);
 
     const render = () => {
       const on = !!DiversiaEditor.get(ta);

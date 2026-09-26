@@ -22,11 +22,32 @@ test('every referenced file exists in every package', () => {
       ...m.content_scripts.flatMap((c) => [...c.js, ...c.css]),
       ...Object.values(m.icons),
       ...(m.background.scripts || [m.background.service_worker]),
+      m.options_ui.page,
     ];
     for (const f of files) assert.ok(existsSync(`dist/${t}/${f}`), `${t}: ${f}`);
     // files the background script injects on demand
     const bg = readFileSync(`dist/${t}/src/background.js`, 'utf8');
     for (const f of bg.match(/src\/[\w.]+\.(js|css)/g)) assert.ok(existsSync(`dist/${t}/${f}`), `${t}: ${f}`);
+    // scripts the options page pulls in, which are relative to src/
+    const opts = readFileSync(`dist/${t}/${m.options_ui.page}`, 'utf8');
+    for (const [, f] of opts.matchAll(/<script src="([\w.]+\.js)"/g)) {
+      assert.ok(existsSync(`dist/${t}/src/${f}`), `${t}: ${f}`);
+    }
+  }
+});
+
+test('the version check reaches GitHub only, and can be switched off', () => {
+  const v = readFileSync('src/version.js', 'utf8');
+  assert.match(v, /api\.github\.com/);
+  assert.match(v, /SETTING_KEY/);
+  // Chrome and Safari load version.js through importScripts; Firefox lists it
+  // in the manifest, so the service-worker-only path must not be the only one.
+  assert.deepEqual(manifest('firefox').background.scripts, ['src/version.js', 'src/background.js']);
+  const bg = readFileSync('src/background.js', 'utf8');
+  assert.match(bg, /credentials: 'omit'/);
+  // No host permission is asked for: api.github.com allows cross-origin reads.
+  for (const t of ['chrome', 'firefox', 'safari']) {
+    assert.equal(manifest(t).host_permissions, undefined, t);
   }
 });
 
@@ -34,7 +55,7 @@ test('Chrome and Safari use a service worker, Firefox an event page with a gecko
   assert.equal(manifest('chrome').background.service_worker, 'src/background.js');
   assert.equal(manifest('safari').background.service_worker, 'src/background.js');
   const ff = manifest('firefox');
-  assert.deepEqual(ff.background, { scripts: ['src/background.js'] });
+  assert.deepEqual(ff.background, { scripts: ['src/version.js', 'src/background.js'] });
   assert.equal(ff.browser_specific_settings.gecko.id, GECKO_ID);
   assert.deepEqual(ff.browser_specific_settings.gecko.data_collection_permissions, { required: ['none'] });
 });

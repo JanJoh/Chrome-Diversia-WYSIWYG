@@ -5,6 +5,11 @@
   border: 1px solid #888; background: #2a2a2a; color: #eee; cursor: pointer;
 }
 .dvw-switch[aria-pressed="true"] { border-color: #c62828; background: #3a1d1d; }
+/* "Version x finns att hämta", shown next to the switch when a newer release exists */
+.dvw-update {
+  font: 12px/1.2 system-ui, sans-serif; margin-left: 8px;
+  color: #c62828; text-decoration: underline;
+}
 
 .dvw-wrapper { border: 1px solid #666; border-radius: 4px; margin: 4px 0; box-sizing: border-box; max-width: 100%; }
 .dvw-toolbar {
@@ -105,6 +110,7 @@
   .dvw-swatch { width: 30px; min-width: 30px; height: 30px; min-height: 30px; padding: 0; }
   .dvw-picker { width: 40px; height: 40px; }
   .dvw-switch { font-size: 15px; padding: 8px 12px; }
+  .dvw-update { font-size: 14px; display: inline-block; padding: 6px 0; }
   /* 16px stops iOS Safari from zooming in when a field gets focus */
   .dvw-input, .dvw-select, .dvw-area { font-size: 16px; }
   .dvw-member, .dvw-tab, .dvw-chip { min-height: 40px; font-size: 15px; }

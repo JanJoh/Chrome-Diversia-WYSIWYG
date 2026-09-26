@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Diversia WYSIWYG</title>
+  <style>
+    body { font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; margin: 16px; min-width: 320px; }
+    h1 { font-size: 15px; margin: 0 0 12px; }
+    .row { display: flex; align-items: center; gap: 8px; margin: 12px 0 4px; }
+    .hint { color: #666; font-size: 12px; margin: 4px 0 0; }
+    .note { background: #f3f6fb; border-left: 3px solid #3b6ea5; padding: 8px 10px; }
+    @media (prefers-color-scheme: dark) {
+      body { background: #202124; color: #e8eaed; }
+      .hint { color: #9aa0a6; }
+      .note { background: #2a3038; border-left-color: #8ab4f8; }
+      a { color: #8ab4f8; }
+    }
+  </style>
+</head>
+<body>
+  <h1 id="title"></h1>
+
+  <p class="hint note" id="update" hidden><span id="updatetext"></span>
+    <a id="updatelink" target="_blank" rel="noopener"></a></p>
+
+  <div class="row">
+    <input type="checkbox" id="updateCheck">
+    <label for="updateCheck" id="updateCheckLabel"></label>
+  </div>
+  <p class="hint" id="updateCheckHint"></p>
+
+  <p class="hint" id="installed"></p>
+
+  <script src="version.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

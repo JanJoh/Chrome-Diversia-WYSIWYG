@@ -145,11 +145,19 @@ Redigeraren anpassar sig när den är smal:
 
 Taggattribut som du inte rört behålls exakt som de skrevs, inklusive ordningen.
 
+## Versionskontroll
+
+Tillägget frågar GitHub en gång per dygn vilken den senaste utgåvan är. Finns det en nyare version dyker en länk upp bredvid **Visuell redigering**-knappen: *Version 0.4.0 finns att hämta*. Eftersom ett klick på ikonen lägger till redigeraren finns ingen panel att visa notisen i, så den hamnar där du ändå tittar.
+
+Kontrollen går att stänga av: högerklicka på ikonen och välj **Alternativ** (eller gå via `chrome://extensions`), och avmarkera **Sök efter nya versioner**.
+
+Det är tilläggets enda anrop till något annat än sidan du är på. Inga kakor följer med (`credentials: "omit"`), inga egna rubriker sätts, och ingenting om dig eller din text skickas. Svaret sparas lokalt i ett dygn, så tjugo öppna Diversia-flikar ger ändå på sin höjd ett anrop. Ingen ny behörighet begärs för det, eftersom GitHub tillåter läsning från andra ursprung.
+
 ## Integritet
 
-Tillägget har ingen nätverkskod. Det samlar inte in, skickar eller lagrar någon text. Det enda som sparas är ditt på/av-val, lokalt i webbläsaren. Det använder följande behörigheter:
+Tillägget samlar inte in, skickar eller lagrar någon text. Det som sparas lokalt i webbläsaren är ditt på/av-val, om versionskontrollen är påslagen, och det senaste svaret från den. Den enda utgående förfrågan är versionskontrollen ovan. Tillägget använder följande behörigheter:
 
-- **`storage`** för det valet.
+- **`storage`** för de valen.
 - **`activeTab` + `scripting`** så att ett klick på ikonen kan lägga till redigeraren i fliken du är i.
 - **Automatisk körning** endast på Diversia-domänerna som listas ovan.
 
@@ -174,13 +182,16 @@ Upplägget är medvetet litet, utan byggsteg och utan beroenden vid körning:
 | `src/editor.js` | Verktygsraden och den contenteditable-redigerare som är kopplad till en `<textarea>` |
 | `src/pickers.js` | Bildväljaren (galleriskanning, URL-kontroller, storlek/placering/ram) och medlemsväljaren (vänlistan) |
 | `src/content.js` | Hittar textrutor och lägger till knappen |
-| `src/background.js` | Verktygsikonen: injicerar redigeraren på valfri sida |
+| `src/background.js` | Verktygsikonen: injicerar redigeraren på valfri sida, och gör versionskontrollens anrop |
+| `src/version.js` | Jämförelse av versionsnummer och adresserna kontrollen använder, delat av bakgrundsskriptet och inställningssidan |
+| `src/options.html`, `src/options.js` | Inställningssidan: på/av för versionskontrollen och vad den senast hittade |
 | `scripts/build.mjs` | Manifest och paket per webbläsare |
 | `test/converter.test.mjs` | Tester för rundgång och sanering, körda i riktig Chromium, inklusive hela inlägg i `test/samples/` |
 | `test/e2e.test.mjs` | Demosidan, plus det inlästa tillägget på en låtsas-Diversia-sida (inklusive formulärpostning) |
 | `test/pickers.test.mjs` | Galleriskanning, bildinställningar och redigering, URL-kontroller, vänlista, sökning och medlemsnummer |
 | `test/mobile.test.mjs` | Användning på mobilstorlek med pekskärm: infälld verktygsrad, tryck som behåller markeringen, dialoger i helskärm |
 | `test/build.test.mjs` | Att de tre paketen är kompletta och har rätt manifestform per webbläsare |
+| `test/version.test.mjs` | Att bara en verkligt nyare utgåva räknas som nyare |
 
 ### Kända begränsningar och att göra
 

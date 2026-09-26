@@ -147,11 +147,19 @@ The editor adapts when it's narrow:
 
 Tag attributes you didn't touch are kept exactly as written, including their order.
 
+## Version check
+
+The extension asks GitHub once a day what the latest release is. If a newer version exists, a link appears next to the **Visuell redigering** switch: *Version 0.4.0 is available*. Clicking the icon adds the editor, so there is no panel to put the notice in — it goes where you are already looking.
+
+It can be switched off: right-click the icon and choose **Options** (or go via `chrome://extensions`), and clear **Look for new versions**.
+
+This is the extension's only request to anything other than the page you are on. No cookies are sent (`credentials: "omit"`), no headers of our own are set, and nothing about you or your text goes with it. The answer is cached locally for a day, so twenty open Diversia tabs still cost at most one request. No new permission is asked for, since GitHub allows cross-origin reads.
+
 ## Privacy
 
-The extension has no network code. It does not collect, send or store any text. The only thing it stores is your on/off preference, locally in the browser. It uses these permissions:
+The extension does not collect, send or store any text. What it stores locally in the browser is your on/off preference, whether the version check is enabled, and that check's last answer. The version check above is its only outgoing request. It uses these permissions:
 
-- **`storage`** for that preference.
+- **`storage`** for those preferences.
 - **`activeTab` + `scripting`** so that clicking the icon can add the editor to the tab you're on.
 - **Automatic runs** only on the Diversia domains listed above.
 
@@ -176,13 +184,16 @@ The layout is small on purpose, with no build step and no dependencies at runtim
 | `src/editor.js` | The toolbar and contenteditable editor, bound to a `<textarea>` |
 | `src/pickers.js` | The image picker (gallery scan, URL checks, size/position/border) and the member picker (friends list) |
 | `src/content.js` | Finds text boxes and adds the switch |
-| `src/background.js` | The toolbar icon: injects the editor on any page |
+| `src/background.js` | The toolbar icon: injects the editor on any page, and makes the version check's request |
+| `src/version.js` | Version-number comparison and the addresses the check uses, shared by the background script and the options page |
+| `src/options.html`, `src/options.js` | The options page: the version check's on/off switch and whatever it last found |
 | `scripts/build.mjs` | Per-browser manifests and packages |
 | `test/converter.test.mjs` | Roundtrip and sanitising tests, run in real Chromium, including complete posts in `test/samples/` |
 | `test/e2e.test.mjs` | The demo page, plus the loaded extension on a mock Diversia page (form posting included) |
 | `test/pickers.test.mjs` | Gallery scanning, image options and editing, URL checks, friends list, search and member numbers |
 | `test/mobile.test.mjs` | Phone-sized touch use: folded toolbar, taps keeping the selection, full-screen dialogs |
 | `test/build.test.mjs` | The three packages are complete and have the right manifest shape per browser |
+| `test/version.test.mjs` | Only a genuinely later release counts as newer |
 
 ### Known limitations and to-dos
 

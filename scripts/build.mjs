@@ -15,8 +15,9 @@ export const GECKO_ID = 'diversia-wysiwyg@extensions';
 export function manifestFor(target) {
   const m = clone(base);
   if (target === 'firefox') {
-    // Firefox MV3 runs background scripts as event pages, not service workers
-    m.background = { scripts: ['src/background.js'] };
+    // Firefox MV3 runs background scripts as event pages, not service workers.
+    // Event pages have no importScripts, so version.js is listed here instead.
+    m.background = { scripts: ['src/version.js', 'src/background.js'] };
     m.browser_specific_settings = {
       gecko: {
         id: GECKO_ID,

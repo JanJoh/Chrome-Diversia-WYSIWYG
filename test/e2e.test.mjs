@@ -140,3 +140,52 @@ test('extension: switch appears on Diversia pages and the form posts markup', as
     await ctx.close();
   }
 });
+
+// The version notice, driven from a seeded cache so the test never reaches
+// GitHub: what is exercised is the content script -> background -> storage
+// path and the rendering, not the network.
+test('extension: a newer release is announced next to the switch, and can be switched off', async () => {
+  build(['chrome']);
+  const extDir = path.join(repo, 'dist', 'chrome');
+  const userDataDir = await mkdtemp(path.join(os.tmpdir(), 'dvw-'));
+  const ctx = await playwright.chromium.launchPersistentContext(userDataDir, chromiumOptions({
+    headless: false,
+    args: [
+      '--headless=new',
+      `--disable-extensions-except=${extDir}`,
+      `--load-extension=${extDir}`,
+      `--host-resolver-rules=MAP www.diversia.social 127.0.0.1:${port}`,
+    ],
+    viewport: { width: 1000, height: 800 },
+  }));
+  try {
+    const sw = ctx.serviceWorkers()[0] || await ctx.waitForEvent('serviceworker', { timeout: 15000 });
+    // A fresh timestamp keeps the once-a-day rule satisfied, so no fetch happens.
+    const seed = (v) => sw.evaluate(async (latest) => {
+      await chrome.storage.local.set({ 'dvw-versioncheck': { t: Date.now(), latest } });
+    }, v);
+
+    await seed('v9.9.9');
+    const page = await ctx.newPage();
+    await page.goto('http://www.diversia.social/mock.html');
+    const notice = page.locator('.dvw-update');
+    await notice.waitFor({ timeout: 15000 });
+    assert.match(await notice.textContent(), /9\.9\.9/);
+    assert.match(await notice.getAttribute('href'), /JanJoh\/Chrome-Diversia-WYSIWYG\/releases$/);
+
+    // An older or equal release says nothing at all.
+    await seed('v0.0.1');
+    await page.reload();
+    await page.locator('.dvw-switch').first().waitFor({ timeout: 15000 });
+    assert.equal(await page.locator('.dvw-update').count(), 0, 'no notice for an older release');
+
+    // Switching the check off silences it even when a newer release is known.
+    await seed('v9.9.9');
+    await sw.evaluate(async () => { await chrome.storage.local.set({ 'dvw-updatecheck': false }); });
+    await page.reload();
+    await page.locator('.dvw-switch').first().waitFor({ timeout: 15000 });
+    assert.equal(await page.locator('.dvw-update').count(), 0, 'switched off');
+  } finally {
+    await ctx.close();
+  }
+});
