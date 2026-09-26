@@ -8,6 +8,23 @@ A browser extension for **Chrome, Firefox and Safari** (Mac, iPhone and iPad) th
 
 ![The editor on a Diversia-style page](docs/extension.png)
 
+## Contents
+
+- [What it does](#what-it-does)
+- [Image picker](#image-picker)
+- [Member picker](#member-picker)
+- [Install](#install)
+  - [Chrome (and Edge, Brave…)](#chrome-and-edge-brave)
+  - [Firefox](#firefox)
+  - [Safari (Mac)](#safari-mac)
+  - [On a phone or tablet](#on-a-phone-or-tablet)
+- [Supported markup](#supported-markup)
+- [Version check](#version-check)
+- [Privacy](#privacy)
+- [Development](#development)
+  - [Known limitations and to-dos](#known-limitations-and-to-dos)
+- [License](#license)
+
 ## What it does
 
 - Adds a **"Visual editing: ON/OFF"** switch above every larger text box on Diversia.

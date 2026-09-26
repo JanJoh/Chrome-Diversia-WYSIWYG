@@ -8,6 +8,23 @@ Ett webbläsartillägg för **Chrome, Firefox och Safari** (Mac, iPhone och iPad
 
 > **In English:** a browser extension that adds visual (WYSIWYG) editing to Diversia's text markup. See [README.en.md](README.en.md).
 
+## Innehåll
+
+- [Vad tillägget gör](#vad-tillägget-gör)
+- [Bildväljaren](#bildväljaren)
+- [Medlemsväljaren](#medlemsväljaren)
+- [Installation](#installation)
+  - [Chrome (och Edge, Brave…)](#chrome-och-edge-brave)
+  - [Firefox](#firefox)
+  - [Safari (Mac)](#safari-mac)
+  - [På mobil och surfplatta](#på-mobil-och-surfplatta)
+- [Markup som stöds](#markup-som-stöds)
+- [Versionskontroll](#versionskontroll)
+- [Integritet](#integritet)
+- [Utveckling](#utveckling)
+  - [Kända begränsningar och att göra](#kända-begränsningar-och-att-göra)
+- [Licens](#licens)
+
 ## Vad tillägget gör
 
 - Lägger till en **"Visuell redigering: PÅ/AV"**-knapp ovanför varje större textruta på Diversia.
