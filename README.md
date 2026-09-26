@@ -102,8 +102,8 @@ Tillägget finns inte i någon webbläsarbutik, så du installerar det själv fr
 ### Chrome (och Edge, Brave…)
 
 1. Öppna `chrome://extensions` i adressfältet.
-2. Slå på **Utvecklarläge** uppe till höger.
-3. Klicka på **Läs in uppackat** och välj mappen du packade upp.
+2. Slå på **Programmerarläge** uppe till höger.
+3. Klicka på **Läs in opaketerat tillägg** och välj mappen du packade upp.
 
 Tillägget blir kvar tills du tar bort det. Gå till Diversia, så sitter **Visuell redigering** ovanför textrutorna.
 
