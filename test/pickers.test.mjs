@@ -248,6 +248,8 @@ test('site furniture is kept out of the pictures', async () => {
       '<div style="background-image:url(https://cc.example.com/pres/layout/misc/whitestar.svg)"></div>',
       '<div style="background-image:url(https://cc.example.com/pres/layout/misc/emojis/u1f44d.svg)"></div>',
       '<div style="background-image:url(https://cc.example.com/pres/bild_def/_forbidden.png)"></div>',
+      '<div style="background-image:url(https://cc.example.com/pres/bild_def/_ingen?3)"></div>',
+      '<div style="background-image:url(https://cc.example.com/pres/layout/loading_balls.svg)"></div>',
       '<div style="background-image:url(https://cc.example.com/pres/bnrs/797.jpg)"></div>',
     ].join('');
     const doc = new DOMParser().parseFromString(html, 'text/html');

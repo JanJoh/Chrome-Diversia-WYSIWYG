@@ -74,6 +74,9 @@
     'button', 'arrow', 'logo', 'badge', 'flag', 'loading',
     'star', '/layout/', 'forbidden', 'placeholder', 'avatar', 'pic_prof',
     'banner', '/bnrs?/', '/ads?/',
+    // the stand-ins a site keeps for a picture it won't show: on Diversia
+    // /pres/bild_def/ holds _ingen ("none"), _forbidden and their siblings
+    '/bild_def/', '/defaults?/',
   ].join('|'), 'i');
 
   // Diversia draws gallery thumbnails as inline background-image on the link
