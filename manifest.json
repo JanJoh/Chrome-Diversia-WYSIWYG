@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Diversia WYSIWYG",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Visuell redigering (WYSIWYG) för Diversias textkod: fetstil, färger, citat, länkar, bilder och Spotify, utan att skriva taggar för hand.",
   "icons": {
     "16": "icons/icon16.png",
