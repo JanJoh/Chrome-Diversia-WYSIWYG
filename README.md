@@ -17,7 +17,8 @@ Ett webbläsartillägg för **Chrome, Firefox och Safari** (Mac, iPhone och iPad
   - [Chrome (och Edge, Brave…)](#chrome-och-edge-brave)
   - [Firefox](#firefox)
   - [Safari (Mac)](#safari-mac)
-  - [På mobil och surfplatta](#på-mobil-och-surfplatta)
+  - [Bygga själv](#bygga-själv)
+- [På mobil och surfplatta](#på-mobil-och-surfplatta)
 - [Markup som stöds](#markup-som-stöds)
 - [Versionskontroll](#versionskontroll)
 - [Integritet](#integritet)
@@ -84,57 +85,64 @@ Båda väljarna läser sidor enbart från sajten du är på, som den inloggade d
 
 ## Installation
 
-`npm run build` skapar ett paket per webbläsare i `dist/`:
+Tillägget finns inte i någon webbläsarbutik, så du installerar det själv från en zip-fil. Det tar ungefär en minut, och du behöver inte kunna något om kod.
 
-| Paket | För |
+**1. Hämta filen.** Öppna [senaste versionen](https://github.com/JanJoh/Chrome-Diversia-WYSIWYG/releases/latest) och ladda ner den som passar din webbläsare:
+
+| Fil att ladda ner | För |
 |---|---|
-| `diversia-wysiwyg-chrome-<v>.zip` | Chrome, Edge, Brave, Opera, Vivaldi |
-| `diversia-wysiwyg-firefox-<v>.zip` | Firefox på dator och Android |
-| `diversia-wysiwyg-safari-<v>.zip` | Safari på macOS, iOS och iPadOS |
+| `diversia-wysiwyg-chrome-*.zip` | Chrome, Edge, Brave, Opera, Vivaldi |
+| `diversia-wysiwyg-firefox-*.zip` | Firefox på dator och Android |
+| `diversia-wysiwyg-safari-*.zip` | Safari på macOS, iOS och iPadOS |
 
-De uppackade mapparna ligger bredvid i `dist/chrome`, `dist/firefox` och `dist/safari`. Roten i det här förrådet är också ett giltigt Chrome-tillägg.
+**2. Packa upp den.** Dubbelklicka på zip-filen. Du får en mapp — det är den som webbläsaren ska läsa in, inte zip-filen.
+
+**3. Läs in mappen.** Följ stegen för din webbläsare nedan.
 
 ### Chrome (och Edge, Brave…)
 
-**Testa direkt:**
+1. Öppna `chrome://extensions` i adressfältet.
+2. Slå på **Utvecklarläge** uppe till höger.
+3. Klicka på **Läs in uppackat** och välj mappen du packade upp.
 
-1. Öppna `chrome://extensions` och slå på **Utvecklarläge**.
-2. Klicka på **Läs in uppackat** och välj `dist/chrome`.
-
-Tillägget blir kvar.
-
-**Publicera:** ladda upp zip-filen till Chrome Web Store, som har en engångsavgift för utvecklare. Edge Add-ons är gratis.
+Tillägget blir kvar tills du tar bort det. Gå till Diversia, så sitter **Visuell redigering** ovanför textrutorna.
 
 ### Firefox
 
-**Testa direkt:**
-
 1. Öppna `about:debugging#/runtime/this-firefox`.
-2. Klicka på **Läs in temporärt tillägg…** och välj `dist/firefox/manifest.json`.
+2. Klicka på **Läs in temporärt tillägg…** och välj filen `manifest.json` inuti mappen.
 
-Det ligger kvar tills Firefox startas om.
+Det ligger kvar tills Firefox startas om, och måste läsas in igen efter det. Det är Firefox som fungerar så med tillägg som inte kommer från deras butik.
 
-**Behåll det:** skicka in zip-filen till [addons.mozilla.org](https://addons.mozilla.org/developers/). Det är gratis. Välj *On your own* för en signerad fil som bara du delar, eller lista det publikt.
-
-**Behörigheter:** i Firefox bestämmer användaren själv över sidåtkomst. Om knappen inte dyker upp på Diversia klickar du på Tillägg (pusselbiten) och tillåter tillägget på den sajten.
+**Behörigheter:** i Firefox bestämmer du själv över sidåtkomst. Om knappen inte dyker upp på Diversia klickar du på Tillägg (pusselbiten) och tillåter tillägget på den sajten.
 
 ### Safari (Mac)
 
-**Testa direkt (Safari 26 eller senare):**
+Kräver Safari 26 eller senare.
 
 1. Gå till Safari → Inställningar → **Utvecklare**. Syns den inte, slå först på *Visa funktioner för webbutvecklare* under Avancerat.
-2. Klicka på **Lägg till temporärt tillägg…** och välj mappen `dist/safari`.
+2. Klicka på **Lägg till temporärt tillägg…** och välj mappen du packade upp.
 
 Det laddas ur när Safari avslutas, så lägg till det igen efter omstart.
 
-**Behåll det, och få det till iPhone/iPad:** Safari-tillägg distribueras via App Store och kräver Apple Developer Program, som har en årsavgift. Det finns två vägar:
-
-- **Ladda upp** Safari-zipen via **App Store Connect**, som paketerar webbtillägg utan Mac eller Xcode. Det täcker macOS, iOS och iPadOS.
-- **Eller, på en Mac med Xcode,** kör `xcrun safari-web-extension-converter dist/safari` och bygg appen som skapas.
-
 **Behörigheter:** Safari ber dig tillåta tillägget per webbplats. Välj *Tillåt alltid på den här webbplatsen* för Diversia.
 
-### På mobil och surfplatta
+**På iPhone och iPad** går det inte att läsa in ett tillägg för hand. Safari-tillägg måste komma från App Store, vilket kräver Apple Developer Program — se [Bygga själv](#bygga-själv) nedan.
+
+### Bygga själv
+
+Bara om du vill bygga från källkoden i stället för att hämta en färdig fil:
+
+```bash
+npm install
+npm run build
+```
+
+Det skapar `dist/chrome`, `dist/firefox` och `dist/safari` att läsa in, plus en zip per webbläsare. Roten i förrådet är också ett giltigt Chrome-tillägg, så den går att läsa in direkt.
+
+**Att publicera det vidare:** Chrome Web Store har en engångsavgift för utvecklare, Edge Add-ons är gratis. [addons.mozilla.org](https://addons.mozilla.org/developers/) är gratis — välj *On your own* för en signerad fil som bara du delar, eller lista det publikt. Safari distribueras via App Store och kräver Apple Developer Program, som har en årsavgift: ladda upp Safari-zipen via **App Store Connect**, som paketerar webbtillägg utan Mac eller Xcode, eller kör `xcrun safari-web-extension-converter dist/safari` på en Mac med Xcode och bygg appen som skapas. Den vägen täcker macOS, iOS och iPadOS.
+
+## På mobil och surfplatta
 
 Redigeraren anpassar sig när den är smal:
 

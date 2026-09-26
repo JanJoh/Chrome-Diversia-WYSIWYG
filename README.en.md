@@ -17,7 +17,8 @@ A browser extension for **Chrome, Firefox and Safari** (Mac, iPhone and iPad) th
   - [Chrome (and Edge, Brave…)](#chrome-and-edge-brave)
   - [Firefox](#firefox)
   - [Safari (Mac)](#safari-mac)
-  - [On a phone or tablet](#on-a-phone-or-tablet)
+  - [Building it yourself](#building-it-yourself)
+- [On a phone or tablet](#on-a-phone-or-tablet)
 - [Supported markup](#supported-markup)
 - [Version check](#version-check)
 - [Privacy](#privacy)
@@ -86,57 +87,64 @@ Both pickers read pages only from the site you're on, as the logged-in you, and 
 
 ## Install
 
-`npm run build` creates one package per browser in `dist/`:
+The extension isn't in any browser store, so you install it yourself from a zip file. It takes about a minute and needs no knowledge of code.
 
-| Package | For |
+**1. Download the file.** Open the [latest release](https://github.com/JanJoh/Chrome-Diversia-WYSIWYG/releases/latest) and get the one for your browser:
+
+| File to download | For |
 |---|---|
-| `diversia-wysiwyg-chrome-<v>.zip` | Chrome, Edge, Brave, Opera, Vivaldi |
-| `diversia-wysiwyg-firefox-<v>.zip` | Firefox on desktop and Android |
-| `diversia-wysiwyg-safari-<v>.zip` | Safari on macOS, iOS and iPadOS |
+| `diversia-wysiwyg-chrome-*.zip` | Chrome, Edge, Brave, Opera, Vivaldi |
+| `diversia-wysiwyg-firefox-*.zip` | Firefox on desktop and Android |
+| `diversia-wysiwyg-safari-*.zip` | Safari on macOS, iOS and iPadOS |
 
-The unpacked folders are next to them in `dist/chrome`, `dist/firefox` and `dist/safari`. The repository root is also a valid Chrome extension.
+**2. Unzip it.** Double-click the zip file. You get a folder — that folder is what the browser loads, not the zip.
+
+**3. Load the folder.** Follow the steps for your browser below.
 
 ### Chrome (and Edge, Brave…)
 
-**Try it now:**
+1. Open `chrome://extensions` in the address bar.
+2. Switch on **Developer mode**, top right.
+3. Click **Load unpacked** and pick the folder you unzipped.
 
-1. Open `chrome://extensions` and switch on **Developer mode**.
-2. Click **Load unpacked** and pick `dist/chrome`.
-
-It stays installed.
-
-**Publish:** upload the zip to the Chrome Web Store, which has a one-time developer fee. Edge Add-ons is free.
+It stays installed until you remove it. Go to Diversia and **Visuell redigering** sits above the text boxes.
 
 ### Firefox
 
-**Try it now:**
-
 1. Open `about:debugging#/runtime/this-firefox`.
-2. Click **Load Temporary Add-on…** and pick `dist/firefox/manifest.json`.
+2. Click **Load Temporary Add-on…** and pick the `manifest.json` file inside the folder.
 
-It stays until Firefox restarts.
+It stays until Firefox restarts, and has to be loaded again after that. That's how Firefox treats add-ons that don't come from its store.
 
-**Keep it:** submit the zip to [addons.mozilla.org](https://addons.mozilla.org/developers/). It's free. Choose *On your own* for a signed file only you share, or list it publicly.
-
-**Permissions:** Firefox lets users decide on site access. If the switch doesn't appear on Diversia, click the Extensions (puzzle piece) button and allow the extension on that site.
+**Permissions:** Firefox lets you decide on site access. If the switch doesn't appear on Diversia, click the Extensions (puzzle piece) button and allow the extension on that site.
 
 ### Safari (Mac)
 
-**Try it now (Safari 26 or later):**
+Requires Safari 26 or later.
 
 1. Go to Safari → Settings → **Developer**. If you don't see it, first switch on *Show features for web developers* under Advanced.
-2. Click **Add Temporary Extension…** and pick the `dist/safari` folder.
+2. Click **Add Temporary Extension…** and pick the folder you unzipped.
 
 It's unloaded when Safari quits, so add it again after a restart.
 
-**Keep it, and get it on iPhone/iPad:** Safari extensions are distributed through the App Store and require the Apple Developer Program, which has a yearly fee. There are two ways:
-
-- **Upload** the Safari zip through **App Store Connect**, which packages web extensions without a Mac or Xcode. It covers macOS, iOS and iPadOS.
-- **Or, on a Mac with Xcode,** run `xcrun safari-web-extension-converter dist/safari` and build the generated app.
-
 **Permissions:** Safari asks you to allow the extension per website. Choose *Always allow on this website* for Diversia.
 
-### On a phone or tablet
+**On iPhone and iPad** an extension can't be loaded by hand. Safari extensions must come from the App Store, which requires the Apple Developer Program — see [Building it yourself](#building-it-yourself) below.
+
+### Building it yourself
+
+Only if you'd rather build from source than download a finished file:
+
+```bash
+npm install
+npm run build
+```
+
+That creates `dist/chrome`, `dist/firefox` and `dist/safari` to load, plus one zip per browser. The repository root is also a valid Chrome extension, so it can be loaded directly.
+
+**Publishing it further:** the Chrome Web Store has a one-time developer fee; Edge Add-ons is free. [addons.mozilla.org](https://addons.mozilla.org/developers/) is free — choose *On your own* for a signed file only you share, or list it publicly. Safari is distributed through the App Store and requires the Apple Developer Program, which has a yearly fee: upload the Safari zip through **App Store Connect**, which packages web extensions without a Mac or Xcode, or run `xcrun safari-web-extension-converter dist/safari` on a Mac with Xcode and build the generated app. That route covers macOS, iOS and iPadOS.
+
+## On a phone or tablet
 
 The editor adapts when it's narrow:
 
