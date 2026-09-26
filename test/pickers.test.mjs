@@ -148,20 +148,36 @@ test('pickers refuse other sites (same-origin only)', async () => {
   assert.match(err, /samma sajt/);
 });
 
-test('your own page is detected from the site menu when a link carries a member id', async () => {
-  const picked = await page.evaluate(() => {
-    // the shape diversia.social uses: a personal gallery carries the member id,
-    // the site-wide one does not, and the same id appears in a profile link
-    const nav = document.createElement('nav');
-    nav.innerHTML = '<a href="/pic/?id=250">\u{1F5BC}️ Bilder</a>'
-      + '<a href="/pic/">Bilder, 100.000-tals bilder</a>'
-      + '<a href="/profil.php?id=250">Jungleland</a>';
-    document.body.appendChild(nav);
-    const r = DiversiaPickers.autoUrl('gallery');
-    nav.remove();
-    return r;
-  });
-  assert.match(picked, /\/pic\/\?id=250$/);
+// The real diversia.social menu, which is not as tidy as it looks: the gallery
+// keeps the member number in "id", the friends list keeps it in "offpage", and
+// friends' own numbers are sitting in the same page.
+const DIVERSIA_NAV = '<a href="/pic/?id=250">\u{1F5BC}️ Bilder</a>'
+  + '<a href="/pic/">Bilder, 100.000-tals bilder</a>'
+  + '<a href="/fav.php?offpage=250">\u2764️ V\u00e4nner</a>'
+  + '<a href="/fav.php">V\u00e4nner</a>'
+  + '<a href="/inloggade.php?friends=1">23 v\u00e4nner inloggade</a>'
+  + '<a href="/profil.php?id=250">Jungleland</a><a href="/profil.php?id=250"></a>'
+  + '<a href="/profil.php?id=72231">Porslinsdocka</a><a href="/profil.php?id=163856">Sensibel</a>';
+
+const withNav = (kind) => page.evaluate((k) => {
+  const nav = document.createElement('nav');
+  nav.innerHTML = window.__nav;
+  document.body.appendChild(nav);
+  const r = DiversiaPickers.autoUrl(k);
+  nav.remove();
+  return r;
+}, kind);
+
+test('your own gallery is detected from the site menu, not the site-wide one', async () => {
+  await page.evaluate((nav) => { window.__nav = nav; }, DIVERSIA_NAV);
+  assert.match(await withNav('gallery'), /\/pic\/\?id=250$/);
+});
+
+test('the friends list is detected even though its member id is not called "id"', async () => {
+  await page.evaluate((nav) => { window.__nav = nav; }, DIVERSIA_NAV);
+  // fav.php?offpage=250 wins over fav.php and over "23 vänner inloggade",
+  // whose friends=1 must not be mistaken for a member number
+  assert.match(await withNav('friends'), /\/fav\.php\?offpage=250$/);
 });
 
 test('a site that exposes no personal address is left to the old paste-an-address flow', async () => {

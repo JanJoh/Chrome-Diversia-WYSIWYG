@@ -158,24 +158,42 @@
    * Your own page on the site, guessed from its own menu, so the first use of
    * a picker doesn't have to start with pasting an address.
    *
-   * A personal page carries a member id where the site-wide one doesn't
-   * (/pic/?id=250 against /pic/, "Mina vänner" against a member search), and
-   * that id is the member number. Where several candidates carry one, the id
-   * that also appears in a profile link on the page wins. Returns '' when
-   * nothing looks personal, which leaves the old paste-an-address flow alone.
+   * The member number is the key: your gallery and your friends list both
+   * carry it, the site-wide versions don't. The parameter holding it is not
+   * always called "id" -- diversia.social uses /pic/?id=250 for the gallery
+   * but fav.php?offpage=250 for the friends list -- so the number itself is
+   * what we look for, not a parameter name. Returns '' when nothing looks
+   * personal, which leaves the old paste-an-address flow alone.
    */
   const ID_IN = [/[?&](?:id|medlem|member|user|uid)=(\d+)/i, /\/(?:medlem|member|profil|profile|user)\/(\d+)/i];
   const idOf = (href) => { for (const re of ID_IN) { const m = href.match(re); if (m) return m[1]; } return ''; };
 
-  function autoUrl(kind) {
-    const withId = suggestions(kind).map((s) => ({ ...s, id: idOf(s.href) })).filter((s) => s.id);
-    if (!withId.length) return '';
-    const profileIds = new Set();
+  // Your own number is the one that dominates the page's profile links: a
+  // friend turns up once or twice in a list, you turn up in the header, the
+  // menu and every link back to your own pages.
+  function ownId() {
+    const counts = new Map();
     document.querySelectorAll('a[href]').forEach((a) => {
       const href = a.getAttribute('href') || '';
-      if (/profil|profile|medlem|member|user/i.test(href)) { const id = idOf(href); if (id) profileIds.add(id); }
+      if (!/profil|profile|medlem|member|user/i.test(href)) return;
+      const id = idOf(href);
+      if (id) counts.set(id, (counts.get(id) || 0) + 1);
     });
-    return (withId.find((s) => profileIds.has(s.id)) || withId[0]).href;
+    let best = '';
+    let top = 0;
+    counts.forEach((n, id) => { if (n > top) { best = id; top = n; } });
+    return best;
+  }
+
+  function autoUrl(kind) {
+    const cands = suggestions(kind);
+    const me = ownId();
+    if (me) {
+      const mine = cands.find((s) => new RegExp('(?:^|[^0-9])' + me + '(?![0-9])').test(s.href));
+      if (mine) return mine.href;
+    }
+    const withId = cands.filter((s) => idOf(s.href));
+    return withId.length ? withId[0].href : '';
   }
 
   // ------------------------------------------------ image URL sanity check
