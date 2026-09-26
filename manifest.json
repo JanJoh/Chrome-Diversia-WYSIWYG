@@ -1,0 +1,47 @@
+{
+  "manifest_version": 3,
+  "name": "Diversia WYSIWYG",
+  "version": "0.3.0",
+  "description": "Visuell redigering (WYSIWYG) för Diversias textkod: fetstil, färger, citat, länkar, bilder och Spotify, utan att skriva taggar för hand.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Diversia WYSIWYG: lägg till visuell redigering på den här sidan",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.diversia.social/*",
+        "*://diversia.social/*",
+        "*://*.diversia.se/*",
+        "*://diversia.se/*"
+      ],
+      "js": [
+        "src/diversia.js",
+        "src/editor.js",
+        "src/pickers.js",
+        "src/content.js"
+      ],
+      "css": [
+        "src/editor.css"
+      ],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ]
+}

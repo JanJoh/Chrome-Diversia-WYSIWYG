@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diversia WYSIWYG – demo</title>
+<link rel="stylesheet" href="../src/editor.css">
+<style>
+  body { background: #141414; color: #ddd; font: 15px/1.5 Verdana, Arial, sans-serif; margin: 0; padding: 16px; }
+  main { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 20px; } p.lead { color: #aaa; }
+  textarea { width: 100%; min-height: 220px; background: #1e1e1e; color: #ddd; border: 1px solid #555; font: 13px/1.4 monospace; }
+  .out { margin-top: 16px; } .out h2 { font-size: 14px; color: #aaa; font-weight: normal; }
+  pre#markup { white-space: pre-wrap; background: #0e0e0e; border: 1px solid #333; padding: 10px; font-size: 12px; color: #9fd39f; }
+  form button[type=submit] { margin-top: 8px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Diversia WYSIWYG – demo</h1>
+  <p class="lead">Den här sidan fungerar utan tillägget: redigera visuellt här, och se Diversia-koden som skickas med formuläret nedanför. Starta med <code>npm run demo</code> för att bild- och medlemsväljarna ska kunna läsa exempelsidorna.</p>
+  <nav class="sitenav"><a href="mock-gallery.html">Mina bilder</a> · <a href="mock-friends.html">Mina vänner</a></nav>
+  <form id="f" onsubmit="event.preventDefault(); document.getElementById('sent').textContent = new FormData(this).get('text');">
+    <textarea name="text" rows="12"><font size=5 color=#C62828><b>En helt vanlig dagbok</b></font>
+
+Hejsan <font size=4 color=#FF0000>detta blir stort och rött</font> nu är texten vanlig igen.
+
+<b>Jag:</b> Berätta om skolan.
+
+<b>Hon:</b> Damerna bestämde att det vore roligare att skicka <i>mig</i> till skolan.
+
+<blockquote><font color=#999999><i>En bild på ett fönster, regn på rutan och ett ljus i fönsterkarmen.</i></font></blockquote>
+
+<hr>
+
+<m 12345>En medlem</m>, en <a href=https://example.com>länk</a> och en spellista:
+
+<spotify spotify:playlist:37i9dQZF1DXcBWIGoYBM5M></textarea>
+    <button type="submit">Skicka (visar vad som skulle skickas)</button>
+  </form>
+  <div class="out"><h2>Diversia-kod (uppdateras medan du skriver):</h2><pre id="markup"></pre></div>
+  <div class="out"><h2>Senast "skickat":</h2><pre id="sent"></pre></div>
+</main>
+<script src="../src/diversia.js"></script>
+<script src="../src/editor.js"></script>
+<script src="../src/pickers.js"></script>
+<script>
+  // Only for local testing: allow http://localhost images (Diversia itself requires https).
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) DiversiaMarkup.settings.allowInsecureLocal = true;
+  const ta = document.querySelector('textarea');
+  const show = () => { document.getElementById('markup').textContent = ta.value; };
+  ta.addEventListener('input', show);
+  DiversiaEditor.attach(ta, { onChange: show });
+  show();
+</script>
+</body>
+</html>

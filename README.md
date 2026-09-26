@@ -1,0 +1,195 @@
+# Diversia WYSIWYG
+
+Ett webbläsartillägg för **Chrome, Firefox och Safari** (Mac, iPhone och iPad) som ger **visuell redigering (WYSIWYG)** på [Diversia](https://diversia.social/) (tidigare Darkside). Du formaterar dagboksinlägg, presentationer och forumsinlägg med knappar i stället för att skriva `<font size=4 color=#C62828>` för hand.
+
+![Redigeraren på en Diversia-liknande sida](docs/extension.png)
+
+> **In English:** a browser extension that adds visual (WYSIWYG) editing to Diversia's text markup. See [README.en.md](README.en.md).
+
+## Vad tillägget gör
+
+- Lägger till en **"Visuell redigering: PÅ/AV"**-knapp ovanför varje större textruta på Diversia.
+- Visar texten **som den kommer att se ut**, med sajtens eget typsnitt och färger, och en verktygsrad för:
+  - **Text:** **F** *K* <u>U</u>, textstorlek 1–6, färger (en palett plus en fri färgväljare).
+  - **Layout:** centrering, citat (`<blockquote>`), ruta (`<box>`), avdelare (`<hr>`).
+  - **Länkar och media:** länkar, bilder från ditt galleri eller valfri adress, och medlemslänkar från din vänlista (se nedan).
+  - **Inbäddningar:** Spotify (klistra in en `open.spotify.com`-länk så görs den om till den URI som Diversia vill ha), YouTube/Vimeo och SoundCloud.
+  - **Städning:** rensa formatering, och ett **Källkod**-läge för att redigera råmarkupen direkt.
+- **Behåller den ursprungliga textrutan** och uppdaterar den medan du skriver. Sidans eget formulär, utkast och "Spara"-knapp fungerar precis som förut. Tillägget skickar aldrig in något självt.
+- **Städar inklistrad text.** Innehåll från Word, Google Docs eller webbsidor reduceras till det Diversia stöder: rubriker blir stor fet text, listor blir rader, och skript och stilmallar tas bort. Inklistrad Diversia-kod känns igen och visas formaterad.
+- **Rör inte din markup.** Att slå på och av redigeraren ändrar inte ett enda tecken i din befintliga text. Felnästlade taggar som `<b><i>x</b></i>` repareras till rätt ordning (sist öppnad stängs först), och okända taggar syns exakt som sajten visar dem.
+- **Kommer ihåg ditt val.** Lämnar du visuell redigering påslagen öppnas den så nästa gång.
+
+Tillägget körs automatiskt på `diversia.social` och `diversia.se`. På andra sidor klickar du på ikonen i verktygsraden för att lägga till redigeraren bara i den fliken.
+
+## Bildväljaren
+
+![Bildväljaren](docs/image-picker.png)
+
+Klicka på **Bild** för att öppna bildväljaren. Den har två flikar:
+
+- **Mitt galleri** läser din gallerisida på sajten och visar bilderna som miniatyrer.
+  - Den läser även album- och "nästa sida"-länkar därifrån, upp till 8 sidor.
+  - Den hoppar över smileys och ikoner, och använder bilden i full storlek när en miniatyr länkar till en sådan.
+  - Första gången klistrar du in adressen till ditt galleri, eller klickar på ett av förslagen som hämtas från sajtens egen meny ("Mina bilder", "Galleri"…). Sedan kommer den ihåg adressen.
+- **Bildadress (URL)** tar emot vilken bildlänk som helst och kontrollerar den först:
+  - avvisar filer på din egen dator (`data:`, `blob:`, `file:`) och sådant som inte är webbadresser
+  - byter `http://` mot `https://`, eftersom sajten kräver det
+  - rättar vanliga "sida i stället för bild"-länkar (imgur-sidor, Dropbox `?dl=0`) och varnar för Google Drive/Foton
+  - laddar bilden på riktigt, och kan därför berätta om adressen verkligen är en bild och hur stor den är, med en ledtråd när det är en webbsida i stället
+  - föreslår en mindre storlek för väldigt breda bilder
+
+  Om kontrollen misslyckas men du vet att adressen stämmer, till exempel på en sajt som blockerar förhandsvisningar, kan du ändå välja **Infoga ändå**.
+
+Båda flikarna delar enkla inställningar för **storlek** (original, 25/50/75/100 %, eller en bredd i pixlar), **placering** (ingen, vänster eller höger med textflöde, centrerad) och **ram**, med förhandsvisning i realtid.
+
+**Klicka på en bild** i redigeraren för att ändra inställningarna i efterhand eller ta bort bilden.
+
+## Medlemsväljaren
+
+![Medlemsväljaren](docs/member-picker.png)
+
+Klicka på **@** för att öppna medlemsväljaren.
+
+- **Vänner:** den läser din vänlistesida, med samma adress-eller-förslag-upplägg som galleriet, och visar en sökbar lista sorterad på svenskt vis (Å Ä Ö sist). Skriv en del av ett namn och tryck Enter för att infoga det.
+- **Nummer:** den andra fliken tar ett medlemsnummer direkt.
+- **Markerad text:** hade du markerat text blir den texten länken. Annars används medlemmens namn.
+
+Båda väljarna läser sidor enbart från sajten du är på, som den inloggade du, och kontaktar aldrig något annat.
+
+> **Kontrollera en gång:** medlemsväljaren läser numret ur profillänkar (`…?id=12345`, `/medlem/12345`…). På de flesta sajter är det samma nummer som medlemsnumret på presentationssidan, men kontrollera med en vän första gången.
+
+## Installation
+
+`npm run build` skapar ett paket per webbläsare i `dist/`:
+
+| Paket | För |
+|---|---|
+| `diversia-wysiwyg-chrome-<v>.zip` | Chrome, Edge, Brave, Opera, Vivaldi |
+| `diversia-wysiwyg-firefox-<v>.zip` | Firefox på dator och Android |
+| `diversia-wysiwyg-safari-<v>.zip` | Safari på macOS, iOS och iPadOS |
+
+De uppackade mapparna ligger bredvid i `dist/chrome`, `dist/firefox` och `dist/safari`. Roten i det här förrådet är också ett giltigt Chrome-tillägg.
+
+### Chrome (och Edge, Brave…)
+
+**Testa direkt:**
+
+1. Öppna `chrome://extensions` och slå på **Utvecklarläge**.
+2. Klicka på **Läs in uppackat** och välj `dist/chrome`.
+
+Tillägget blir kvar.
+
+**Publicera:** ladda upp zip-filen till Chrome Web Store, som har en engångsavgift för utvecklare. Edge Add-ons är gratis.
+
+### Firefox
+
+**Testa direkt:**
+
+1. Öppna `about:debugging#/runtime/this-firefox`.
+2. Klicka på **Läs in temporärt tillägg…** och välj `dist/firefox/manifest.json`.
+
+Det ligger kvar tills Firefox startas om.
+
+**Behåll det:** skicka in zip-filen till [addons.mozilla.org](https://addons.mozilla.org/developers/). Det är gratis. Välj *On your own* för en signerad fil som bara du delar, eller lista det publikt.
+
+**Behörigheter:** i Firefox bestämmer användaren själv över sidåtkomst. Om knappen inte dyker upp på Diversia klickar du på Tillägg (pusselbiten) och tillåter tillägget på den sajten.
+
+### Safari (Mac)
+
+**Testa direkt (Safari 26 eller senare):**
+
+1. Gå till Safari → Inställningar → **Utvecklare**. Syns den inte, slå först på *Visa funktioner för webbutvecklare* under Avancerat.
+2. Klicka på **Lägg till temporärt tillägg…** och välj mappen `dist/safari`.
+
+Det laddas ur när Safari avslutas, så lägg till det igen efter omstart.
+
+**Behåll det, och få det till iPhone/iPad:** Safari-tillägg distribueras via App Store och kräver Apple Developer Program, som har en årsavgift. Det finns två vägar:
+
+- **Ladda upp** Safari-zipen via **App Store Connect**, som paketerar webbtillägg utan Mac eller Xcode. Det täcker macOS, iOS och iPadOS.
+- **Eller, på en Mac med Xcode,** kör `xcrun safari-web-extension-converter dist/safari` och bygg appen som skapas.
+
+**Behörigheter:** Safari ber dig tillåta tillägget per webbplats. Välj *Tillåt alltid på den här webbplatsen* för Diversia.
+
+### På mobil och surfplatta
+
+Redigeraren anpassar sig när den är smal:
+
+- De mest använda verktygen (**F K U**, storlek, färg, **Bild**, **@**, **Länk**, **Källkod**) syns hela tiden, och resten fälls in under **⋯**.
+- Knapparna är gjorda för fingrar.
+- Dialogrutor fyller skärmen.
+- Textfälten utlöser inte iPhones automatiska zoom.
+- Ett tryck på en verktygsknapp behåller din markering, även om trycket flyttade fokus.
+
+<img src="docs/mobile.png" width="300" alt="Redigeraren på en mobil">
+
+## Markup som stöds
+
+| Diversia | I redigeraren |
+|---|---|
+| `<b>` `<i>` `<u>` | Fet, kursiv, understruken |
+| `<font size=1-6 color=#RRGGBB lineheight=N>` | Storlek och färg |
+| `<center>`, `<p align=…>` | Centrerat eller justerat block |
+| `<blockquote>` | Indraget citat |
+| `<box align bgcolor padding border bordercolor>` | Ruta med bakgrund och ram |
+| `<hr size color width>` | Avdelare |
+| `<br>`, radbrytningar | Radbrytningar (Enter ger en radbrytning, inte ett nytt block) |
+| `<pre>` | Förformaterad text |
+| `<a href=https://…>` | Länk (endast https, som på sajten) |
+| `<img src=https://… width height align border>` | Bild |
+| `<m 12345>…</m>`, `<alster 123>…</alster>` | Medlems- och alsterlänkar (prickad understrykning) |
+| `<video URL>`, `<soundcloud URL>`, `<spotify URI>` | Platshållarblock för inbäddningar |
+| `&lt;` | Ett bokstavligt `<` |
+
+Taggattribut som du inte rört behålls exakt som de skrevs, inklusive ordningen.
+
+## Integritet
+
+Tillägget har ingen nätverkskod. Det samlar inte in, skickar eller lagrar någon text. Det enda som sparas är ditt på/av-val, lokalt i webbläsaren. Det använder följande behörigheter:
+
+- **`storage`** för det valet.
+- **`activeTab` + `scripting`** så att ett klick på ikonen kan lägga till redigeraren i fliken du är i.
+- **Automatisk körning** endast på Diversia-domänerna som listas ovan.
+
+Firefox-paketen deklarerar dessutom att ingen data samlas in (`data_collection_permissions: none`).
+
+## Utveckling
+
+```bash
+npm install                      # installerar Playwright (endast för tester)
+npx playwright install chromium  # en gång
+npm test                         # enhetstester för konverteraren + end-to-end-tester
+npm run screenshots              # uppdaterar docs/*.png
+npm run demo                     # demo på http://localhost:8080/demo/index.html
+npm run build                    # dist/{chrome,firefox,safari} + zip-filer
+```
+
+Upplägget är medvetet litet, utan byggsteg och utan beroenden vid körning:
+
+| Fil | Vad den gör |
+|---|---|
+| `src/diversia.js` | Tolkar markup till redigerar-DOM (`parse`) och gör redigerar- eller inklistrad DOM till markup igen (`serialize`, vitlistbaserad) |
+| `src/editor.js` | Verktygsraden och den contenteditable-redigerare som är kopplad till en `<textarea>` |
+| `src/pickers.js` | Bildväljaren (galleriskanning, URL-kontroller, storlek/placering/ram) och medlemsväljaren (vänlistan) |
+| `src/content.js` | Hittar textrutor och lägger till knappen |
+| `src/background.js` | Verktygsikonen: injicerar redigeraren på valfri sida |
+| `scripts/build.mjs` | Manifest och paket per webbläsare |
+| `test/converter.test.mjs` | Tester för rundgång och sanering, körda i riktig Chromium, inklusive hela inlägg i `test/samples/` |
+| `test/e2e.test.mjs` | Demosidan, plus det inlästa tillägget på en låtsas-Diversia-sida (inklusive formulärpostning) |
+| `test/pickers.test.mjs` | Galleriskanning, bildinställningar och redigering, URL-kontroller, vänlista, sökning och medlemsnummer |
+| `test/mobile.test.mjs` | Användning på mobilstorlek med pekskärm: infälld verktygsrad, tryck som behåller markeringen, dialoger i helskärm |
+| `test/build.test.mjs` | Att de tre paketen är kompletta och har rätt manifestform per webbläsare |
+
+### Kända begränsningar och att göra
+
+- **Återgivningen är ungefärlig.** Redigeraren använder HTML:s standardstorlekar 1–6 och utgår från att sajten visar radbrytningar som de skrivs. Båda är sajtens dokumenterade beteende, men kontrollera det första riktiga inlägget.
+- **Inbäddningar visas som platshållare,** inte som spelare.
+- **URL-kontrollen laddar bilden inuti sidan,** så en sajt med strikt bildpolicy kan få en fungerande adress att underkännas. "Infoga ändå" finns alltid.
+- **Rutattribut går inte att redigera än.** En ny ruta får en standardram. Använd Källkod-läget för att justera den.
+- **Små fält** som "personliga fakta" stöder inte alla taggar, och knappen läggs bara till på större textrutor.
+- **Firefox och Safari byggs och paketeras men är ännu inte testade i de webbläsarna.** De automatiska testerna körs i Chromium. Koden använder bara API:er som alla tre stöder, inklusive namnrymderna `browser`/`chrome`.
+- **`execCommand`** är föråldrat men fortfarande det mest pålitliga redigerings-API:et över Chrome-versioner. Redigeraren är skriven så att den senare kan byta redigeringsmotor.
+
+## Licens
+
+MIT

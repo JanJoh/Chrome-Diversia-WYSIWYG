@@ -1,0 +1,9 @@
+Hejsan <font size=4 color=#FF0000>detta blir stort och rött</font> nu är texten vanlig igen
+
+<b><i>fet och kursiv text</i></b>
+
+<img src=https://www.mindoman.com/minbild.jpg>
+
+<video https://www.youtube.com/watch?v=OlB2W6GKieo>
+
+<spotify spotify:user:strangelove:playlist:7iy05qrBghabEQrL4Keb2m>

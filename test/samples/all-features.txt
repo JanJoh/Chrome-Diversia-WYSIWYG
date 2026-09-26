@@ -1,0 +1,33 @@
+<font size=6><b>En helt vanlig dagbok</b></font>
+<i>med en underrubrik i kursiv</i>
+
+<hr>
+
+<font size=5 color=#C62828><b>I. Början</b></font>
+
+<b>Jag:</b> Hur började det?
+
+<b>Hon:</b> Med en <u>understruken</u> tanke och lite <font color=#1565C0>blått</font>. Och ett hjärta: &lt;3
+
+<i>Hon tittar ut genom fönstret.</i>
+
+<blockquote><font color=#999999><i>En bild på ett fönster, regn på rutan, ett ljus i fönsterkarmen. <b>Signerad</b> i hörnet.</i></font></blockquote>
+
+<center>Centrerad text</center>
+
+<p align=right>Högerställd rad</p>
+
+<box align=center bgcolor=#222222 padding=10 border=1 bordercolor=#C62828>En ruta med <b>fet</b> text</box>
+
+<m 12345>En medlem</m> skrev <alster 42>ett alster</alster>.
+
+<pre>  förformaterad
+    text</pre>
+
+<a href=https://example.com/sida?a=1&b=2>En länk</a> och en bild: <img src=https://example.com/bild.jpg width=50%>
+
+<video https://www.youtube.com/watch?v=OlB2W6GKieo>
+
+<spotify spotify:playlist:37i9dQZF1DXcBWIGoYBM5M>
+
+<i>Och vill du ha lite musik:</i> <a href=https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M>open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M</a>
