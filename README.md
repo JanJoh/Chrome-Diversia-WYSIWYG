@@ -1,6 +1,8 @@
 # Diversia WYSIWYG
 
-Ett webbläsartillägg för **Chrome, Firefox och Safari** (Mac, iPhone och iPad) som ger **visuell redigering (WYSIWYG)** på [Diversia](https://diversia.social/) (tidigare Darkside). Du formaterar dagboksinlägg, presentationer och forumsinlägg med knappar i stället för att skriva `<font size=4 color=#C62828>` för hand.
+Ett webbläsartillägg för **Chrome, Firefox och Safari** (Mac, iPhone och iPad) som ger **visuell redigering (WYSIWYG)** på [Diversia](https://diversia.social/). Du formaterar dagboksinlägg, presentationer och forumsinlägg med knappar i stället för att skriva `<font size=4 color=#C62828>` för hand.
+
+*Diversia hette tidigare Darkside.se.*
 
 ![Redigeraren på en Diversia-liknande sida](docs/extension.png)
 

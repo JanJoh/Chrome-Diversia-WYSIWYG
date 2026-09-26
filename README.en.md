@@ -2,7 +2,9 @@
 
 > **På svenska:** [README.md](README.md) är huvuddokumentationen. Den här filen är en engelsk översättning.
 
-A browser extension for **Chrome, Firefox and Safari** (Mac, iPhone and iPad) that adds **visual (WYSIWYG) editing** to [Diversia](https://diversia.social/) (formerly Darkside). You can format journal entries, presentations and forum posts with buttons instead of writing `<font size=4 color=#C62828>` by hand.
+A browser extension for **Chrome, Firefox and Safari** (Mac, iPhone and iPad) that adds **visual (WYSIWYG) editing** to [Diversia](https://diversia.social/). You can format journal entries, presentations and forum posts with buttons instead of writing `<font size=4 color=#C62828>` by hand.
+
+*Diversia was formerly Darkside.se.*
 
 ![The editor on a Diversia-style page](docs/extension.png)
 

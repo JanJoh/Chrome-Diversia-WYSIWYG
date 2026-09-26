@@ -1,7 +1,7 @@
 /*
  * Diversia markup <-> editor DOM.
  *
- * Diversia (formerly Darkside) uses a small HTML-like tag language:
+ * Diversia uses a small HTML-like tag language:
  *   <font size= color= lineheight=>  <b> <i> <u>  <hr size= color= width=>  <br>
  *   <p align=>  <pre>  <center>  <a href=>  <blockquote>  <img src= ...>
  *   <box align= bgcolor= padding= border= bordercolor=>
