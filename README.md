@@ -33,7 +33,8 @@ Klicka på **Bild** för att öppna bildväljaren. Den har två flikar:
 - **Mitt galleri** läser din gallerisida på sajten och visar bilderna som miniatyrer.
   - Den läser även album- och "nästa sida"-länkar därifrån, upp till 8 sidor.
   - Den hoppar över smileys och ikoner, och använder bilden i full storlek när en miniatyr länkar till en sådan.
-  - Första gången klistrar du in adressen till ditt galleri, eller klickar på ett av förslagen som hämtas från sajtens egen meny ("Mina bilder", "Galleri"…). Sedan kommer den ihåg adressen.
+  - **Adressen hittas oftast av sig själv.** Sajtens egen meny länkar till ditt galleri, och en personlig sida bär ditt medlemsnummer där den gemensamma inte gör det (`/pic/?id=250` mot `/pic/`). Den länken väljs direkt, så galleriet är redan inläst när väljaren öppnas.
+  - Hittas ingen sådan länk klistrar du in adressen första gången, eller klickar på ett av förslagen från menyn ("Mina bilder", "Galleri"…). Sedan kommer den ihåg adressen.
 - **Bildadress (URL)** tar emot vilken bildlänk som helst och kontrollerar den först:
   - avvisar filer på din egen dator (`data:`, `blob:`, `file:`) och sådant som inte är webbadresser
   - byter `http://` mot `https://`, eftersom sajten kräver det
@@ -53,7 +54,7 @@ Båda flikarna delar enkla inställningar för **storlek** (original, 25/50/75/1
 
 Klicka på **@** för att öppna medlemsväljaren.
 
-- **Vänner:** den läser din vänlistesida, med samma adress-eller-förslag-upplägg som galleriet, och visar en sökbar lista sorterad på svenskt vis (Å Ä Ö sist). Skriv en del av ett namn och tryck Enter för att infoga det.
+- **Vänner:** den läser din vänlistesida, med samma automatik och samma adress-eller-förslag-upplägg som galleriet, och visar en sökbar lista sorterad på svenskt vis (Å Ä Ö sist). Skriv en del av ett namn och tryck Enter för att infoga det.
 - **Nummer:** den andra fliken tar ett medlemsnummer direkt.
 - **Markerad text:** hade du markerat text blir den texten länken. Annars används medlemmens namn.
 

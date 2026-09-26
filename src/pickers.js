@@ -154,6 +154,30 @@
     return [...out.entries()].slice(0, 6).map(([href, text]) => ({ href, text }));
   }
 
+  /*
+   * Your own page on the site, guessed from its own menu, so the first use of
+   * a picker doesn't have to start with pasting an address.
+   *
+   * A personal page carries a member id where the site-wide one doesn't
+   * (/pic/?id=250 against /pic/, "Mina vänner" against a member search), and
+   * that id is the member number. Where several candidates carry one, the id
+   * that also appears in a profile link on the page wins. Returns '' when
+   * nothing looks personal, which leaves the old paste-an-address flow alone.
+   */
+  const ID_IN = [/[?&](?:id|medlem|member|user|uid)=(\d+)/i, /\/(?:medlem|member|profil|profile|user)\/(\d+)/i];
+  const idOf = (href) => { for (const re of ID_IN) { const m = href.match(re); if (m) return m[1]; } return ''; };
+
+  function autoUrl(kind) {
+    const withId = suggestions(kind).map((s) => ({ ...s, id: idOf(s.href) })).filter((s) => s.id);
+    if (!withId.length) return '';
+    const profileIds = new Set();
+    document.querySelectorAll('a[href]').forEach((a) => {
+      const href = a.getAttribute('href') || '';
+      if (/profil|profile|medlem|member|user/i.test(href)) { const id = idOf(href); if (id) profileIds.add(id); }
+    });
+    return (withId.find((s) => profileIds.has(s.id)) || withId[0]).href;
+  }
+
   // ------------------------------------------------ image URL sanity check
   function loadImage(url, timeoutMs) {
     return new Promise((resolve) => {
@@ -433,7 +457,7 @@
       ]);
       m.body.appendChild(tb.bar); m.body.appendChild(tb.panes);
       Store.get('galleryUrl').then((saved) => {
-        const start = saved || opts.galleryUrl || '';
+        const start = saved || opts.galleryUrl || autoUrl('gallery');
         gallery.input.value = start;
         if (start) { tb.show('gallery'); gallery.run(); } else tb.show('url');
       });
@@ -501,12 +525,12 @@
     m.footer.appendChild(h('span', { class: 'dvw-spacer' }));
     m.footer.appendChild(h('button', { type: 'button', class: 'dvw-btn', text: t('Avbryt', 'Cancel'), onclick: () => m.close() }));
     Store.get('friendsUrl').then((saved) => {
-      const start = saved || opts.friendsUrl || '';
+      const start = saved || opts.friendsUrl || autoUrl('friends');
       friends.input.value = start;
       if (start) { tb.show('friends'); friends.run(); } else tb.show('number');
     });
     return m;
   }
 
-  root.DiversiaPickers = { imageDialog, memberDialog, checkImageUrl, scanGallery, imagesFrom, membersFrom, albumLinks, suggestions, Store };
+  root.DiversiaPickers = { imageDialog, memberDialog, checkImageUrl, scanGallery, imagesFrom, membersFrom, albumLinks, suggestions, autoUrl, Store };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

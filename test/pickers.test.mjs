@@ -147,3 +147,24 @@ test('pickers refuse other sites (same-origin only)', async () => {
   const err = await page.evaluate(() => DiversiaPickers.scanGallery('https://example.com/gallery').then(() => '', (e) => e.message));
   assert.match(err, /samma sajt/);
 });
+
+test('your own page is detected from the site menu when a link carries a member id', async () => {
+  const picked = await page.evaluate(() => {
+    // the shape diversia.social uses: a personal gallery carries the member id,
+    // the site-wide one does not, and the same id appears in a profile link
+    const nav = document.createElement('nav');
+    nav.innerHTML = '<a href="/pic/?id=250">\u{1F5BC}️ Bilder</a>'
+      + '<a href="/pic/">Bilder, 100.000-tals bilder</a>'
+      + '<a href="/profil.php?id=250">Jungleland</a>';
+    document.body.appendChild(nav);
+    const r = DiversiaPickers.autoUrl('gallery');
+    nav.remove();
+    return r;
+  });
+  assert.match(picked, /\/pic\/\?id=250$/);
+});
+
+test('a site that exposes no personal address is left to the old paste-an-address flow', async () => {
+  // the demo page links "Mina bilder" without any id, so nothing is assumed
+  assert.equal(await page.evaluate(() => DiversiaPickers.autoUrl('gallery')), '');
+});

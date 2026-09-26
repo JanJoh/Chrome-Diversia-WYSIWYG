@@ -35,7 +35,8 @@ Click **Bild** to open the image picker. It has two tabs:
 - **My gallery** reads your gallery page on the site and shows its images as thumbnails.
   - It reads album and "next page" links from that page too, up to 8 pages.
   - It skips smileys and icons, and uses the full-size image when a thumbnail links to one.
-  - The first time, paste your gallery address or click one of the suggestions taken from the site's own menu ("Mina bilder", "Galleri"…). It's remembered after that.
+  - **The address usually finds itself.** The site's own menu links to your gallery, and a personal page carries your member number where the site-wide one doesn't (`/pic/?id=250` against `/pic/`). That link is chosen straight away, so the gallery is already loaded when the picker opens.
+  - If no such link exists, paste the address the first time, or click one of the suggestions from the menu ("Mina bilder", "Galleri"…). It's remembered after that.
 - **Image address (URL)** takes any image link and checks it first:
   - rejects files on your own computer (`data:`, `blob:`, `file:`) and things that aren't web addresses
   - switches `http://` to `https://`, since the site requires it
@@ -55,7 +56,7 @@ Both tabs share simple settings for **size** (original, 25/50/75/100 %, or a wid
 
 Click **@** to open the member picker.
 
-- **Friends:** it reads your friends list page, with the same address-or-suggestion setup as the gallery, and shows a searchable list, sorted the Swedish way (Å Ä Ö last). Type part of a name and press Enter to insert it.
+- **Friends:** it reads your friends list page, with the same automatic detection and address-or-suggestion setup as the gallery, and shows a searchable list, sorted the Swedish way (Å Ä Ö last). Type part of a name and press Enter to insert it.
 - **Number:** the other tab takes a member number directly.
 - **Selected text:** if you had text selected, that text becomes the link. Otherwise the member's name is used.
 
